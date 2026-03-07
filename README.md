@@ -5,6 +5,7 @@
 ## 目录结构
 
 ```
+├── ai-coding/       # AI 辅助编程（Claude Code、Copilot 等）
 ├── programming/     # 编程相关
 ├── tools/           # 工具使用
 ├── notes/           # 学习笔记
