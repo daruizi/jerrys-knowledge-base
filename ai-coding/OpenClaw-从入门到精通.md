@@ -14,10 +14,11 @@
 4. [安装指南](#安装指南)
 5. [配置详解](#配置详解)
 6. [国内主流 IM 对接指南 (飞书/钉钉/企微)](#国内主流-im-对接指南-飞书钉钉企微)
-7. [Canvas 画布与设备节点 (Nodes)](#canvas-画布与设备节点-nodes)
-8. [进阶技巧与自动化](#进阶技巧与自动化)
-9. [安全加固与生产环境部署](#安全加固与生产环境部署)
-10. [常见问题与故障排除](#常见问题与故障排除)
+7. [实战 SOP：打造 24 小时钉钉助理](#实战-sop打造-24-小时钉钉助理)
+8. [Canvas 画布与设备节点 (Nodes)](#canvas-画布与设备节点-nodes)
+9. [进阶技巧与自动化](#进阶技巧与自动化)
+10. [安全加固与生产环境部署](#安全加固与生产环境部署)
+11. [常见问题与故障排除](#常见问题与故障排除)
 
 ---
 
@@ -224,18 +225,25 @@ pi gateway
 
 ---
 
-### 2. 钉钉 (DingTalk)
+### 2. 钉钉 (DingTalk) —— 无需公网 IP (Stream 模式)
 
-钉钉支持两种接入：Outgoing 机器人（简单）和 企业自建应用（功能全）。这里介绍更强大的**应用模式**。
+强烈推荐使用钉钉企业内部应用的 **Stream (流式) 模式**，它采用长连接机制，**完全不需要配置公网 IP、内网穿透或 HTTPS 证书**。
 
 **操作步骤：**
-1.  **创建应用**：登录 [钉钉开发者后台](https://open-dev.dingtalk.com/) -> “应用开发” -> “企业内部开发” -> “机器人”。
-2.  **配置机器人**：
-    - 开启“机器人能力”。
-    - 设置名为“消息接收地址”的 Webhook：`https://你的域名/webhook/dingtalk`。
-3.  **获取参数**：获取 `AppKey` (或 `AgentId`) 与 `AppSecret`。
-4.  **安全设置**：在机器人详情页，开启“加签”模式，并记录生成的 `Secret`。
-5.  **上线**：完成版本保护后点击“上线”。
+1.  **创建应用**：登录 [钉钉开发者后台](https://open-dev.dingtalk.com/) -> “应用开发” -> “企业内部开发” -> 创建应用并添加“机器人”能力。
+2.  **开启 Stream 模式**：
+    - 在机器人配置的“消息接收模式”中，选择 **Stream 模式**（这是免内网穿透的关键）。
+3.  **获取密钥参数**：在应用详情的“凭证与基础信息”中，获取 `Client ID` (即 AppKey) 和 `Client Secret` (即 AppSecret)。
+4.  **配置 OpenClaw 密钥**：在 `openclaw.json` 中添加配置：
+    ```json
+    "channels": {
+      "dingtalk": {
+        "clientId": "${DING_CLIENT_ID}",
+        "clientSecret": "${DING_CLIENT_SECRET}"
+      }
+    }
+    ```
+5.  **发布应用**：在后台完成版本发布上线。
 
 ---
 
@@ -254,9 +262,9 @@ pi gateway
 
 ---
 
-### 4. 关键：网络穿透与公网访问
+### 4. 关键：网络穿透与公网访问 (适用飞书/企微)
 
-国内 IM 平台的 Webhook 必须通过 **HTTPS** 访问。如果你在本地运行 OpenClaw，建议使用以下方案：
+飞书和企微的 Webhook 必须通过 **HTTPS** 访问（**钉钉 Stream 模式可完全跳过此步**）。如果你在本地运行 OpenClaw，建议使用以下方案：
 
 - **方案 A (简单)**：使用 **Tailscale Funnel**。将本地端口直接映射到 Tailscale 提供的公网域名。
 - **方案 B (稳定)**：使用 **Cloudflare Tunnel (cloudflared)**。无需公网 IP，安全且自带 HTTPS。
@@ -267,6 +275,49 @@ pi gateway
       reverse_proxy localhost:18789
   }
   ```
+
+---
+
+## 实战 SOP：打造 24 小时钉钉助理
+
+为了让 OpenClaw 真正发挥作用，我们需要将其转变为一个**永不掉线、开机自启的后台守护进程 (Daemon)**。
+
+### 第一步：环境与模型就绪
+确保已完成基本的模型配置（推荐本地 Ollama 或支持 API 调用的国内大模型，如 Qwen）。
+
+### 第二步：钉钉应用白名单与指令授权
+确保已完成上述钉钉的 Stream 模式配置。同时，如果你需要让它执行系统命令或搜索网页，在 `openclaw.json` 的 `agents` 段中必须明确授权工具白名单：
+```json
+{
+  "agents": {
+    "dingtalk_agent": {
+      "allowedTools": ["bash", "read_file", "search_web", "browser_*"]
+    }
+  }
+}
+```
+
+### 第三步：配置守护进程保活 (Daemon)
+在生产环境中，**不要直接运行 `pi gateway`**（关掉终端服务就停了）。推荐使用 PM2 来管理它。
+
+**使用 PM2 (推荐)**：
+```bash
+# 全局安装 PM2
+npm install -g pm2
+
+# 启动 OpenClaw 并命名为 pi-gateway
+pm2 start pi --name pi-gateway -- gateway
+
+# 设置开机自启
+pm2 startup
+pm2 save
+```
+
+### 第四步：日常运维指令
+现在你的钉钉助理已经 24 小时在线了。遇到问题时，请使用以下关键命令进行排错和维护：
+- `pm2 status`: 查看 OpenClaw 是否正在后台正常运行。
+- `pm2 logs pi-gateway`: **排障核心命令**。实时查看 AI 思考的日志（如果 AI 回复慢或报错，通常能在这里看到类似“API 额度不足”或“工具调用失败”的具体原因）。
+- `pm2 restart pi-gateway`: 每次修改 `openclaw.json` 配置后，必须执行此命令以重启生效。
 
 ---
 
