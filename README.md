@@ -37,6 +37,7 @@ graph TD
 
 | 文档 | 核心亮点 | 链接 |
 |:-----|:---------|:-----:|
+| **MCP Server 开发实战** | 手把手 TypeScript 编写本地读写插件 | [查看](./ai-coding/实战篇-开发我的第一个-MCP-Server.md) |
 | **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/claude-code-guide.md) |
 | **MCP 协议完全通关** | TypeScript/Python 开发、多模型连接 | [查看](./ai-coding/Claude-Code-MCP-从入门到精通.md) |
 | **Skills 高级进阶** | 自动化拦截 (Hooks)、子代理 (Fork) | [查看](./ai-coding/Claude-Code-Skills-从入门到精通.md) |

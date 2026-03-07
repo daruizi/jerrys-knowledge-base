@@ -6,6 +6,7 @@
 
 | 文档 | 描述 |
 |------|------|
+| [实战篇-开发我的第一个-MCP-Server.md](./实战篇-开发我的第一个-MCP-Server.md) | **MCP 开发从 0 到 1**：手把手带练，用 TypeScript 写一个能读写本地硬盘的“私人笔记助手” |
 | [claude-code-guide.md](./claude-code-guide.md) | **Claude Code 保姆级指南**：面向新手的从零安装、国内模型代理及排错教程 |
 | [Claude-Code-MCP-从入门到精通.md](./Claude-Code-MCP-从入门到精通.md) | **MCP 协议完全指南**：涵盖核心概念、TypeScript/Python 开发及安全实战 |
 | [Claude-Code-Skills-从入门到精通.md](./Claude-Code-Skills-从入门到精通.md) | **Skills 扩展机制完全指南**：涵盖自动化钩子、动态上下文与高级重构模式 |
