@@ -205,66 +205,68 @@ pi gateway
 
 ## 国内主流 IM 对接指南 (飞书/钉钉/企微)
 
-OpenClaw 对国内开发者非常友好，支持通过自建机器人或企业协议接入。
+由于国内网络环境和平台政策，对接 OpenClaw 建议使用**企业自建应用**模式。
 
-### 1. 飞书 (Feishu/Lark) 配置
+### 1. 飞书 (Feishu / Lark) —— 推荐首选
 
-> [!TIP]
-> 飞书建议创建一个"企业自建应用"，并开启"机器人"能力。
+飞书的机器人接口最为开放且交互体验最佳。
 
-**环境变量配置：**
-```bash
-FEISHU_APP_ID="cli_********"
-FEISHU_APP_SECRET="********"
-FEISHU_VERIFICATION_TOKEN="********"
-```
+**操作步骤：**
+1.  **创建应用**：登录 [飞书开放平台](https://open.feishu.cn/) -> “创建企业自建应用”。
+2.  **启用机器人**：在应用详情页 -> “添加应用能力” -> 开启“机器人”功能。
+3.  **获取密钥**：在“凭证与基础信息”中获取 `App ID` 和 `App Secret`。
+4.  **配置事件订阅**：
+    - 在“事件订阅”页面，设置请求地址：`https://你的公网域名/webhook/feishu`。
+    - 在“添加事件”中勾选：`接收消息` (或 `im.message.receive_v1`)。
+    - **域名校验**：OpenClaw 保持运行状态下，点击飞书页面的“保存”，OpenClaw 会自动处理 Challenge 校验。
+5.  **权限设置**：在“权限管理”中勾选 `message:api` 相关权限（发送/接收消息）。
+6.  **发布应用**：在“版本管理与发布”中，创建一个版本并申请在企业内上线。
 
-**JSON 配置：**
-```json
-{
-  "channels": {
-    "feishu": {
-      "appId": "${FEISHU_APP_ID}",
-      "appSecret": "${FEISHU_APP_SECRET}",
-      "encryptKey": "...",
-      "verificationToken": "${FEISHU_VERIFICATION_TOKEN}"
-    }
-  }
-}
-```
+---
 
-### 2. 钉钉 (DingTalk) 自定义机器人
+### 2. 钉钉 (DingTalk)
 
-支持通过 Webhook 和 加签安全设置。
+钉钉支持两种接入：Outgoing 机器人（简单）和 企业自建应用（功能全）。这里介绍更强大的**应用模式**。
 
-```json
-{
-  "channels": {
-    "dingtalk": {
-      "token": "机器人 Webhook 的 access_token",
-      "secret": "加签模式下的密钥"
-    }
-  }
-}
-```
+**操作步骤：**
+1.  **创建应用**：登录 [钉钉开发者后台](https://open-dev.dingtalk.com/) -> “应用开发” -> “企业内部开发” -> “机器人”。
+2.  **配置机器人**：
+    - 开启“机器人能力”。
+    - 设置名为“消息接收地址”的 Webhook：`https://你的域名/webhook/dingtalk`。
+3.  **获取参数**：获取 `AppKey` (或 `AgentId`) 与 `AppSecret`。
+4.  **安全设置**：在机器人详情页，开启“加签”模式，并记录生成的 `Secret`。
+5.  **上线**：完成版本保护后点击“上线”。
+
+---
 
 ### 3. 企业微信 (WeCom)
 
-常用的接入方式是作为"内部应用"开发。
+企微的交互机制较为严格，主要通过“接收消息服务器”完成。
 
-```json
-{
-  "channels": {
-    "wecom": {
-      "corpId": "ID",
-      "agentId": 1000001,
-      "secret": "SECRET",
-      "token": "验证 Token",
-      "encodingAESKey": "AES 密钥"
-    }
+**操作步骤：**
+1.  **管理后台**：登录 [企业微信管理后台](https://work.weixin.qq.com/) -> “应用管理” -> “自建”。
+2.  **API 接收消息**：
+    - 点击“接收消息” -> “设置 API 接收”。
+    - **URL**：`https://你的域名/webhook/wecom`。
+    - **Token / EncodingAESKey**：点击“随机生成”并记录。
+3.  **获取 Secret**：获取该应用的 `AgentId` 和 `Secret`。
+4.  **连接校验**：在填好 URL 并点击保存时，OpenClaw 会作为后端处理 GET 请求的验证（必须在公网可访问状态下操作）。
+
+---
+
+### 4. 关键：网络穿透与公网访问
+
+国内 IM 平台的 Webhook 必须通过 **HTTPS** 访问。如果你在本地运行 OpenClaw，建议使用以下方案：
+
+- **方案 A (简单)**：使用 **Tailscale Funnel**。将本地端口直接映射到 Tailscale 提供的公网域名。
+- **方案 B (稳定)**：使用 **Cloudflare Tunnel (cloudflared)**。无需公网 IP，安全且自带 HTTPS。
+- **方案 C (可控)**：使用具有公网 IP 的 VPS，配合 **Caddy** 或 **Nginx** 反向代理：
+  ```caddy
+  # Caddyfile 示例
+  your-domain.com {
+      reverse_proxy localhost:18789
   }
-}
-```
+  ```
 
 ---
 
