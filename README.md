@@ -1,32 +1,66 @@
-# Jerry's Knowledge Base
+# Jerry's Knowledge Base 🧠
 
-个人知识库，用于积累学习文档。
+> **一个致力于 AI 辅助编程与个人效率落地的个人知识库。**
+> 
+> 本仓库由 Claude 与我（Jerry）共同管理，旨在通过精准的文档与实战案例，打通 AI 与日常工程实践的最后一步。
 
-## 目录结构
+---
 
+## 📁 核心目录
+
+```mermaid
+graph TD
+    ROOT[Root] --> AI[ai-coding: AI 辅助编程]
+    ROOT --> PROG[programming: 编程语言*]
+    ROOT --> TOOLS[tools: 工具指南*]
+    ROOT --> NOTES[notes: 学习笔记*]
+    ROOT --> RES[resources: 资源库*]
+    
+    subgraph "AI Coding 核心模块"
+        AI --> M1[Claude Code]
+        AI --> M2[MCP 协议]
+        AI --> M3[Skills 机制]
+        AI --> M4[Markdown 进阶]
+        AI --> M5[OpenClaw 平台]
+    end
+    
+    style AI fill:#f9f,stroke:#333,stroke-width:2px
+    style ROOT fill:#bbf,stroke:#333,stroke-width:2px
 ```
-├── ai-coding/       # AI 辅助编程（Claude Code、Copilot 等）
-│   ├── Markdown-从入门到精通.md
-│   ├── Claude-Code-MCP-从入门到精通.md
-│   ├── Claude-Code-Skills-从入门到精通.md
-│   └── OpenClaw-从入门到精通.md
-├── programming/     # 编程相关
-├── tools/           # 工具使用
-├── notes/           # 学习笔记
-└── resources/       # 资源收集
-```
+*注：标注 `*` 的目录目前正在筹备中。*
 
-## 文档索引
+---
 
-### AI 辅助编程
+## 📚 精选文档索引
 
-| 文档 | 描述 |
-|------|------|
-| [Markdown 从入门到精通](ai-coding/Markdown-从入门到精通.md) | 全面的 Markdown 语法指南，涵盖基础语法、扩展语法、高级技巧与最佳实践 |
-| [Claude Code MCP 从入门到精通](ai-coding/Claude-Code-MCP-从入门到精通.md) | MCP 协议完整教程，涵盖核心概念、配置使用、TypeScript/Python 开发与最佳实践 |
-| [Claude Code Skills 从入门到精通](ai-coding/Claude-Code-Skills-从入门到精通.md) | Skills 机制深度教程，涵盖文件夹命名逻辑、Global Variables、Hooks 系统与高级重构模式 |
-| [OpenClaw 从入门到精通](ai-coding/OpenClaw-从入门到精通.md) | 个人 AI 助手平台教程，涵盖 Mermaid 架构、本地模型、**国内 IM (飞书/钉钉/企微) 对接**及多设备 Node 管理 |
+### 🚀 AI 辅助编程 (AI Coding)
 
-## 说明
+| 文档 | 核心亮点 | 链接 |
+|:-----|:---------|:-----:|
+| **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/claude-code-guide.md) |
+| **MCP 协议完全通关** | TypeScript/Python 开发、多模型连接 | [查看](./ai-coding/Claude-Code-MCP-从入门到精通.md) |
+| **Skills 高级进阶** | 自动化拦截 (Hooks)、子代理 (Fork) | [查看](./ai-coding/Claude-Code-Skills-从入门到精通.md) |
+| **OpenClaw 全能助手** | **飞书/钉钉集成**、Canvas、本地 LLM | [查看](./ai-coding/OpenClaw-从入门到精通.md) |
+| **Markdown 权威指南** | Mermaid、GitHub Alerts、排版规范 | [查看](./ai-coding/Markdown-从入门到精通.md) |
 
-持续更新中...
+---
+
+## 🛠️ 项目规范
+
+### 配置说明 (CLAUDE.md)
+我们在项目根目录维护了 [CLAUDE.md](./CLAUDE.md)，用于指导 AI 助手（如 Claude Code）遵循我们的项目偏好、命名规范和工作流。
+
+### 运行建议
+建议通过本地 `pi gateway` (OpenClaw) 或 `claude` (Claude Code) 开启 Agent 模式浏览本库，体验深度上下文关联。
+
+---
+
+## 📝 最近动态
+
+- **2026-03-07**: 完成 `ai-coding` 系列文档深度重构，新增国内 IM 对接方案与高级扩展教程。
+- **2026-03-07**: 优化项目根目录结构，引入 Mermaid 架构展示。
+
+---
+
+> 📅 最后更新：2026-03-07  
+> 📚 GitHub Repo: [jerrys-knowledge-base](https://github.com/daruizi/jerrys-knowledge-base)
