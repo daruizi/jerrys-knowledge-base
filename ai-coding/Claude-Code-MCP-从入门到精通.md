@@ -1,6 +1,8 @@
 # Claude Code - MCP 从入门到精通
 
 > Model Context Protocol (MCP) 是连接 AI 应用与外部系统的开放标准，本教程将带你从零开始掌握 MCP 的核心概念、配置使用和开发技巧。
+>
+> **本教程基于 MCP SDK v1.x（`@modelcontextprotocol/sdk`）编写。**
 
 ---
 
@@ -10,10 +12,11 @@
 2. [MCP 核心概念](#mcp-核心概念)
 3. [MCP 架构解析](#mcp-架构解析)
 4. [在 Claude Code 中使用 MCP](#在-claude-code-中使用-mcp)
-5. [创建你的第一个 MCP Server](#创建你的第一个-mcp-server)
-6. [实战案例：天气查询 MCP Server](#实战案例天气查询-mcp-server)
-7. [MCP 最佳实践](#mcp-最佳实践)
-8. [常见问题与排错](#常见问题与排错)
+5. [热门 MCP Server 推荐](#热门-mcp-server-推荐)
+6. [创建你的第一个 MCP Server](#创建你的第一个-mcp-server)
+7. [实战案例：天气查询 MCP Server](#实战案例天气查询-mcp-server)
+8. [MCP 最佳实践](#mcp-最佳实践)
+9. [常见问题与排错](#常见问题与排错)
 
 ---
 
@@ -35,6 +38,20 @@
 - ✅ **一次开发，到处运行** —— 写一个 MCP Server，就能在 Claude Code、Claude Desktop、Cursor、VS Code 等支持 MCP 的客户端中使用
 - ✅ **标准化协议** —— 统一的数据交换格式，降低学习成本
 - ✅ **丰富的生态** —— 官方和社区提供了大量现成的 MCP Server
+
+### MCP vs Function Calling
+
+很多人会混淆 MCP 和 OpenAI 的 Function Calling（Tool Use），它们的核心区别如下：
+
+| 特性 | MCP | Function Calling |
+|------|-----|-----------------|
+| **标准化** | 开放协议，多客户端通用 | 各厂商私有实现 |
+| **运行位置** | 独立进程或远程服务 | 嵌入应用代码中 |
+| **可复用性** | 一次开发，多客户端使用 | 每个应用需要单独实现 |
+| **生态系统** | 社区共享，可直接安装使用 | 无统一生态 |
+| **服务发现** | 自动发现可用工具/资源 | 需手动定义工具列表 |
+
+简单来说：**Function Calling 定义了"AI 能调什么"，MCP 定义了"AI 怎么连外部系统"**。
 
 ### MCP 能做什么？
 
@@ -95,12 +112,15 @@ MCP 定义了三个核心概念，理解它们是掌握 MCP 的关键：
 
 ### 传输方式
 
-MCP 支持两种传输方式：
+MCP 支持三种传输方式：
 
 | 传输方式 | 适用场景 | 特点 |
 |----------|----------|------|
 | **Stdio** | 本地进程 | 性能最佳，适合本地工具 |
 | **HTTP/SSE** | 远程服务 | 支持云服务，可跨网络 |
+| **Streamable HTTP** | 远程服务（推荐） | 新一代传输方式，支持双向流式通信，未来主流方案 |
+
+> **提示：** 对于远程服务，新项目推荐优先使用 Streamable HTTP。SSE 方式仍然广泛兼容。
 
 ---
 
@@ -222,8 +242,8 @@ MCP 服务器可以配置在不同的作用域：
 
 | 作用域 | 命令参数 | 存储位置 | 用途 |
 |--------|----------|----------|------|
-| **local** | `--scope local` | `~/.claude.json` | 仅当前项目可用（默认） |
-| **project** | `--scope project` | `.mcp.json` | 团队共享，提交到版本控制 |
+| **local** | `--scope local` | 项目目录下 `.claude/settings.json` | 仅当前项目可用（默认） |
+| **project** | `--scope project` | 项目根目录 `.mcp.json` | 团队共享，提交到版本控制 |
 | **user** | `--scope user` | `~/.claude.json` | 所有项目可用 |
 
 ```bash
@@ -274,6 +294,31 @@ claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
 
 ---
 
+## 热门 MCP Server 推荐
+
+以下是一些常用的、开箱即用的 MCP Server，安装后可以大幅扩展 Claude Code 的能力：
+
+### 官方 / 平台托管
+
+| MCP Server | 用途 | 添加方式 |
+|------------|------|---------|
+| **GitHub Copilot** | GitHub Issue、PR、代码搜索 | `claude mcp add --transport http github https://api.githubcopilot.com/mcp/` |
+| **Sentry** | 错误监控与排查 | `claude mcp add --transport http sentry https://mcp.sentry.dev/mcp` |
+| **Notion** | 笔记、知识库管理 | `claude mcp add --transport http notion https://mcp.notion.com/mcp` |
+
+### 社区热门
+
+| MCP Server | 用途 | 添加方式 |
+|------------|------|---------|
+| **Filesystem** | 本地文件读写 | `claude mcp add --transport stdio fs -- npx -y @modelcontextprotocol/server-filesystem /path` |
+| **Context7** | 第三方库文档查询 | `claude mcp add --transport http context7 https://mcp.context7.com/mcp` |
+| **DBHub** | 数据库操作 | `claude mcp add --transport stdio db -- npx -y @bytebase/dbhub` |
+| **Puppeteer** | 浏览器自动化 | `claude mcp add --transport stdio puppeteer -- npx -y @modelcontextprotocol/server-puppeteer` |
+
+> **提示：** 完整列表可参阅 [Awesome MCP Servers](https://github.com/punkpeye/awesome-mcp-servers)。
+
+---
+
 ## 创建你的第一个 MCP Server
 
 ### 环境准备
@@ -282,7 +327,7 @@ claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
 - Node.js 18+ 或 Python 3.10+
 - npm 或 uv（Python 包管理器）
 
-### 使用 TypeScript 创建 MCP Server
+### 方式一：使用 TypeScript
 
 #### 步骤 1：创建项目
 
@@ -419,10 +464,17 @@ main().catch((error) => {
 ```bash
 # 编译 TypeScript
 npm run build
-
-# 本地测试
-node dist/index.js
 ```
+
+> **注意：** Stdio 模式的 MCP Server 直接运行 `node dist/index.js` 后，服务器会在 stderr 输出 `MCP Server started successfully!`，然后阻塞等待 stdin 输入（这是正常行为）。用 `Ctrl+C` 退出。
+>
+> **推荐使用 MCP Inspector 进行交互式测试**（比手动输入 JSON 更方便）：
+>
+> ```bash
+> npx @modelcontextprotocol/inspector node dist/index.js
+> ```
+>
+> 这会在浏览器中打开调试界面，可以查看工具列表并测试调用。
 
 #### 步骤 6：在 Claude Code 中使用
 
@@ -440,6 +492,89 @@ claude mcp list
 > 请使用 add 工具计算 123 + 456
 > 请用中文问候张三
 ```
+
+### 方式二：使用 Python
+
+Python 使用 `FastMCP` 框架可以更快速地创建 MCP Server。
+
+#### 步骤 1：创建项目
+
+```bash
+# 创建项目目录
+mkdir my-python-mcp-server
+cd my-python-mcp-server
+
+# 使用 uv 初始化（推荐）
+uv init
+uv add mcp
+```
+
+#### 步骤 2：创建 MCP Server
+
+创建 `server.py`：
+
+```python
+from mcp.server.fastmcp import FastMCP
+
+# 创建 MCP Server 实例
+mcp = FastMCP("my-python-server")
+
+
+# 定义工具：加法计算器
+@mcp.tool()
+def add(a: int, b: int) -> str:
+    """Add two numbers together"""
+    result = a + b
+    return f"The sum of {a} and {b} is {result}"
+
+
+# 定义工具：问候语生成
+@mcp.tool()
+def greet(name: str, language: str = "english") -> str:
+    """Generate a personalized greeting message
+
+    Args:
+        name: Name to greet
+        language: Language for greeting (english, chinese, spanish)
+    """
+    greetings = {
+        "english": f"Hello, {name}! Nice to meet you!",
+        "chinese": f"你好，{name}！很高兴认识你！",
+        "spanish": f"¡Hola, {name}! ¡Mucho gusto!",
+    }
+    return greetings.get(language, greetings["english"])
+
+
+# 定义资源
+@mcp.resource("config://languages")
+def get_supported_languages() -> str:
+    """List of supported greeting languages"""
+    import json
+    return json.dumps(["english", "chinese", "spanish"])
+
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+#### 步骤 3：测试并添加到 Claude Code
+
+```bash
+# 使用 MCP Inspector 测试
+npx @modelcontextprotocol/inspector uv run server.py
+
+# 添加到 Claude Code
+claude mcp add --transport stdio my-python-mcp -- uv run /path/to/server.py
+```
+
+> **TypeScript vs Python 对比：**
+>
+> | 方面 | TypeScript | Python |
+> |------|-----------|--------|
+> | 代码量 | 较多，需要显式定义 | 较少，装饰器简洁 |
+> | 类型安全 | Zod schema 验证 | 类型注解自动推断 |
+> | 生态 | npm 生态，前端友好 | pip/uv，数据科学友好 |
+> | 推荐场景 | 前端开发者、npm 发布 | 快速原型、数据处理 |
 
 ---
 
@@ -460,6 +595,8 @@ const server = new McpServer({
   name: "weather-server",
   version: "1.0.0",
 });
+
+// ========== 工具定义 ==========
 
 // 天气查询工具
 server.tool(
@@ -562,21 +699,8 @@ server.tool(
   }
 );
 
-// 启动服务器
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("Weather MCP Server started!");
-}
+// ========== 资源定义 ==========
 
-main().catch(console.error);
-```
-
-### 添加资源支持
-
-MCP 服务器还可以暴露资源：
-
-```typescript
 // 添加资源：支持的城市列表
 server.resource(
   "supported-cities",
@@ -601,11 +725,9 @@ server.resource(
     };
   }
 );
-```
 
-### 使用提示词模板
+// ========== 提示词模板 ==========
 
-```typescript
 // 添加提示词模板
 server.prompt(
   "weather-report",
@@ -623,7 +745,19 @@ server.prompt(
     ],
   })
 );
+
+// ========== 启动服务器 ==========
+
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("Weather MCP Server started!");
+}
+
+main().catch(console.error);
 ```
+
+> **说明：** 这个完整文件将工具、资源和提示词模板整合在一起。实际开发中，如果代码量较大，可以将工具、资源、提示词分别拆分到不同文件中再统一导入。
 
 ---
 
@@ -690,6 +824,8 @@ server.tool(
 
 ### 3. 安全考虑
 
+#### 环境变量管理
+
 ```typescript
 // 使用环境变量存储敏感信息
 server.tool(
@@ -707,6 +843,83 @@ server.tool(
     // 使用 apiKey 进行 API 调用
   }
 );
+```
+
+#### 输入验证与防注入
+
+```typescript
+// ✅ 使用严格的 Zod schema 验证输入
+server.tool(
+  "query_users",
+  "Search users by name",
+  {
+    // 限制输入长度和字符范围，防止注入攻击
+    name: z.string()
+      .min(1)
+      .max(100)
+      .regex(/^[a-zA-Z0-9\s\u4e00-\u9fff]+$/)
+      .describe("User name to search"),
+    limit: z.number()
+      .int()
+      .min(1)
+      .max(50)
+      .default(10)
+      .describe("Max results"),
+  },
+  async ({ name, limit }) => {
+    // 使用参数化查询，绝不拼接 SQL
+    const results = await db.query(
+      "SELECT name, email FROM users WHERE name LIKE $1 LIMIT $2",
+      [`%${name}%`, limit]
+    );
+    return {
+      content: [{ type: "text", text: JSON.stringify(results) }],
+    };
+  }
+);
+```
+
+#### 权限控制
+
+```typescript
+// ✅ 限制工具操作范围
+server.tool(
+  "read_file",
+  "Read a file from the allowed directory",
+  {
+    path: z.string().describe("Relative file path"),
+  },
+  async ({ path }) => {
+    const ALLOWED_DIR = process.env.ALLOWED_DIR || "/tmp/safe";
+    const fullPath = resolve(ALLOWED_DIR, path);
+
+    // 防止路径穿越攻击
+    if (!fullPath.startsWith(resolve(ALLOWED_DIR))) {
+      return {
+        content: [{ type: "text", text: "Error: Access denied - path outside allowed directory" }],
+        isError: true,
+      };
+    }
+
+    const content = await readFile(fullPath, "utf-8");
+    return {
+      content: [{ type: "text", text: content }],
+    };
+  }
+);
+```
+
+#### 敏感数据脱敏
+
+```typescript
+// ✅ 返回结果中隐藏敏感字段
+function sanitizeUser(user: any) {
+  const { password, ssn, ...safeFields } = user;
+  return {
+    ...safeFields,
+    email: user.email.replace(/(.{2}).*(@.*)/, "$1***$2"), // j***@example.com
+  };
+}
 ```
 
 ### 4. 资源设计
@@ -824,9 +1037,11 @@ npx @modelcontextprotocol/inspector node dist/index.js
 **方法二：添加日志**
 
 ```typescript
-// 在服务器代码中添加日志（输出到 stderr）
+// 在服务器代码中添加日志（输出到 stderr，不影响 MCP 通信）
 console.error("Debug: Processing request for", input);
 ```
+
+> **注意：** MCP 使用 stdout 进行通信，调试日志必须输出到 **stderr**（使用 `console.error`），否则会破坏 MCP 协议。
 
 ---
 
@@ -844,6 +1059,9 @@ claude mcp add --transport http <name> <url>
 # 添加本地服务器
 claude mcp add --transport stdio <name> -- <command>
 
+# 从 JSON 配置添加
+claude mcp add-json <name> '<json>'
+
 # 列出所有服务器
 claude mcp list
 
@@ -854,7 +1072,26 @@ claude mcp get <name>
 claude mcp remove <name>
 ```
 
-### 工具定义模板
+### .mcp.json 配置模板
+
+```json
+{
+  "mcpServers": {
+    "my-http-server": {
+      "type": "http",
+      "url": "https://api.example.com/mcp"
+    },
+    "my-local-server": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["dist/index.js"],
+      "env": { "API_KEY": "${MY_API_KEY}" }
+    }
+  }
+}
+```
+
+### TypeScript 工具定义模板
 
 ```typescript
 server.tool(
@@ -869,6 +1106,20 @@ server.tool(
     };
   }
 );
+```
+
+### Python 工具定义模板
+
+```python
+@mcp.tool()
+def tool_name(param1: str, param2: int = 10) -> str:
+    """Tool description
+
+    Args:
+        param1: Parameter description
+        param2: Optional parameter with default
+    """
+    return f"Result: {param1}, {param2}"
 ```
 
 ### 资源定义模板
@@ -890,13 +1141,56 @@ server.resource(
 
 ---
 
+## 发布你的 MCP Server 到 npm
+
+当你的 MCP Server 开发完成后，可以发布到 npm，让其他人通过 `npx -y your-package` 直接使用。
+
+### 步骤
+
+1. **更新 `package.json`**：确保 `bin` 字段正确指向入口文件
+
+```json
+{
+  "name": "@yourname/my-mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "my-mcp-server": "dist/index.js"
+  },
+  "files": ["dist"]
+}
+```
+
+2. **在入口文件顶部添加 shebang**
+
+```typescript
+#!/usr/bin/env node
+// src/index.ts 的第一行
+```
+
+3. **构建并发布**
+
+```bash
+npm run build
+npm login
+npm publish --access public
+```
+
+4. **其他用户即可直接使用**
+
+```bash
+claude mcp add --transport stdio my-server -- npx -y @yourname/my-mcp-server
+```
+
+---
+
 ## 推荐资源
 
 ### 官方文档
 
 - [MCP 官方网站](https://modelcontextprotocol.io/)
 - [MCP 规范文档](https://modelcontextprotocol.io/specification/latest)
-- [Claude Code MCP 文档](https://code.claude.com/docs/en/mcp)
+- [Claude Code MCP 文档](https://docs.anthropic.com/en/docs/claude-code/mcp)
 
 ### 示例代码
 
@@ -918,17 +1212,19 @@ MCP 是连接 AI 与外部系统的标准化协议，通过本教程，你已经
 | 知识点 | 掌握程度 |
 |--------|----------|
 | MCP 核心概念（Tools、Resources、Prompts） | ✅ |
+| MCP 与 Function Calling 的区别 | ✅ |
 | 在 Claude Code 中配置和使用 MCP | ✅ |
-| 使用 TypeScript 创建 MCP Server | ✅ |
+| 使用 TypeScript 和 Python 创建 MCP Server | ✅ |
 | 错误处理和安全最佳实践 | ✅ |
 | 常见问题的排查方法 | ✅ |
+| 发布 MCP Server 到 npm | ✅ |
 
 下一步，你可以：
 1. 探索 [官方 MCP Server 仓库](https://github.com/modelcontextprotocol/servers) 中的示例
 2. 为你常用的工具创建 MCP Server
-3. 将你的 MCP Server 分享给社区
+3. 将你的 MCP Server 发布到 npm 分享给社区
 
 ---
 
 > 📅 最后更新：2026-03-07
-> 📚 更多 AI Coding 相关内容请查看 [ai-coding 目录](./README.md)
+> ✍️ 作者：Jerry

@@ -6,7 +6,8 @@
 
 ```
 ├── ai-coding/       # AI 辅助编程（Claude Code、Copilot 等）
-│   └── Markdown-从入门到精通.md
+│   ├── Markdown-从入门到精通.md
+│   └── Claude-Code-MCP-从入门到精通.md
 ├── programming/     # 编程相关
 ├── tools/           # 工具使用
 ├── notes/           # 学习笔记
@@ -20,6 +21,7 @@
 | 文档 | 描述 |
 |------|------|
 | [Markdown 从入门到精通](ai-coding/Markdown-从入门到精通.md) | 全面的 Markdown 语法指南，涵盖基础语法、扩展语法、高级技巧与最佳实践 |
+| [Claude Code MCP 从入门到精通](ai-coding/Claude-Code-MCP-从入门到精通.md) | MCP 协议完整教程，涵盖核心概念、配置使用、TypeScript/Python 开发与最佳实践 |
 
 ## 说明
 
