@@ -136,7 +136,60 @@ pi gateway
 }
 ```
 
-### 2. 高级 Agent 工作空间
+### 2. 国内主流大模型（Qwen/Minimax/GLM/DeepSeek）
+
+> [!NOTE]
+> OpenClaw 通过其强大的 `providers` 系统，可以轻松接入任何兼容 OpenAI 格式的国内模型。
+
+#### A. 通义千问 (Qwen - 阿里巴巴)
+- **Base URL**: `https://dashscope.aliyuncs.com/compatible-mode/v1`
+- **模型推荐**: `qwen-max`, `qwen-plus`, `qwen-turbo`
+
+```json
+"qwen": {
+  "type": "openai",
+  "url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "apiKey": "${QWEN_API_KEY}"
+}
+```
+
+#### B. 智谱清言 (GLM - 智谱 AI)
+- **Base URL**: `https://open.bigmodel.cn/api/paas/v4/`
+- **模型推荐**: `glm-4`, `glm-4-flash`
+
+```json
+"zhipu": {
+  "type": "openai",
+  "url": "https://open.bigmodel.cn/api/paas/v4/",
+  "apiKey": "${ZHIPU_API_KEY}"
+}
+```
+
+#### C. Minimax (海螺 AI)
+- **Base URL**: `https://api.minimax.chat/v1`
+- **模型推荐**: `abab6.5-chat`, `abab6.5s-chat`
+
+```json
+"minimax": {
+  "type": "openai",
+  "url": "https://api.minimax.chat/v1",
+  "apiKey": "${MINIMAX_API_KEY}"
+}
+```
+
+#### D. DeepSeek (深度求索)
+- **Base URL**: `https://api.deepseek.com`
+- **模型推荐**: `deepseek-chat`, `deepseek-coder`
+
+```json
+"deepseek": {
+  "type": "openai",
+  "url": "https://api.deepseek.com",
+  "apiKey": "${DEEPSEEK_API_KEY}"
+}
+```
+
+### 3. 高级 Agent 工作空间
 
 ```json
 {
