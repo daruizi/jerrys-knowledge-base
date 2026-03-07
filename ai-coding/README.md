@@ -6,6 +6,7 @@
 
 | 文档 | 描述 |
 |------|------|
+| [AI-Coding-实战词汇宝典.md](./AI-Coding-实战词汇宝典.md) | **大模型黑话词典**：小白必读！告别晦涩算法词汇，掌握真正的 AI 结对编程与 Agent 开发常用语 |
 | [实战篇-开发我的第一个-MCP-Server.md](./实战篇-开发我的第一个-MCP-Server.md) | **MCP 开发从 0 到 1**：手把手带练，用 TypeScript 写一个能读写本地硬盘的“私人笔记助手” |
 | [claude-code-guide.md](./claude-code-guide.md) | **Claude Code 保姆级指南**：面向新手的从零安装、国内模型代理及排错教程 |
 | [Claude-Code-MCP-从入门到精通.md](./Claude-Code-MCP-从入门到精通.md) | **MCP 协议完全指南**：涵盖核心概念、TypeScript/Python 开发及安全实战 |

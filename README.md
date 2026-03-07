@@ -37,6 +37,7 @@ graph TD
 
 | 文档 | 核心亮点 | 链接 |
 |:-----|:---------|:-----:|
+| **大模型黑话词典** | 小白必读！告别晦涩算法，掌握结对编程黑话 | [查看](./ai-coding/AI-Coding-实战词汇宝典.md) |
 | **MCP Server 开发实战** | 手把手 TypeScript 编写本地读写插件 | [查看](./ai-coding/实战篇-开发我的第一个-MCP-Server.md) |
 | **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/claude-code-guide.md) |
 | **MCP 协议完全通关** | TypeScript/Python 开发、多模型连接 | [查看](./ai-coding/Claude-Code-MCP-从入门到精通.md) |
