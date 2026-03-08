@@ -35,7 +35,14 @@ npm -v
 > **提示**：如果提示未找到命令 (command not found)，请执行以下命令一键安装 Node 环境 (基于 Ubuntu/Debian)：
 > `curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt-get install -y nodejs`
 
-### 3. 安装全局 OpenClaw
+### 3. 确认 Python 3 环境
+我们在后面的高阶步骤中会用到 Python 来运行本地发消息的脚本。现在的阿里云镜像基本都自带了。
+```bash
+python3 --version
+```
+> **提示**：如果提示找不到命令，执行 `sudo apt-get install python3` 安装即可。
+
+### 4. 安装全局 OpenClaw
 在终端执行以下命令，将 OpenClaw 安装到服务器：
 
 ```bash
@@ -100,7 +107,10 @@ nano ~/.openclaw/openclaw.json
 }
 ```
 
-粘贴完成后，按下键盘 `Ctrl + O` (保存)，按 `Enter` (确认文件名)，然后按 `Ctrl + X` (退出编辑器)。
+粘贴完成后，我们要保存它：
+1. 按下电脑键盘的 `Ctrl + O` (字母O，代表保存)。
+2. 会提示“File Name to Write: ...”，直接按回车键 `Enter` 确认。
+3. 最后按下 `Ctrl + X` 退出刚刚那个黑乎乎的编辑器。
 
 ---
 
@@ -169,8 +179,12 @@ if __name__ == "__main__":
     else:
         print("未提供消息内容")
 ```
-按下键盘 `Ctrl + O`，`Enter`，`Ctrl + X` 保存并退出。
-*(别忘了把代码里的 `WEBHOOK_URL` 和 `SECRET` 换成你的！)*
+
+粘贴完成后，同样我们要保存它：
+1. 按下键盘 `Ctrl + O`，代表保存。
+2. 按 `Enter` 回车确认。
+3. 按 `Ctrl + X` 退出编辑器。
+*(注意：务必把上面代码里大写的 `WEBHOOK_URL` 和 `SECRET` 两行，替换成你在钉钉群里刚刚复制出来的真实链接和密钥！)*
 
 ### 第三步：给大模型下达“操作秘籍”规则
 
