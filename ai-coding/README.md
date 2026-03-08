@@ -6,6 +6,7 @@
 
 | 文档 | 描述 |
 |------|------|
+| [实战篇-阿里云轻量服部署OpenClaw钉钉助理.md](./实战篇-阿里云轻量服部署OpenClaw钉钉助理.md) | **阿里云全家桶高阶实战**：(2C2G) 轻量服 + 钉钉私有机器人 + 阿里云大底座(DashScope `qwen-max`) 及高并发 PM2 常驻策略与 Python 定制路由分发(Agent级脚本)。 |
 | [AI-Coding-实战词汇宝典.md](./AI-Coding-实战词汇宝典.md) | **大模型黑话词典**：小白必读！告别晦涩算法词汇，掌握真正的 AI 结对编程与 Agent 开发常用语 |
 | [实战篇-开发我的第一个-MCP-Server.md](./实战篇-开发我的第一个-MCP-Server.md) | **MCP 开发从 0 到 1**：手把手带练，用 TypeScript 写一个能读写本地硬盘的“私人笔记助手” |
 | [claude-code-guide.md](./claude-code-guide.md) | **Claude Code 保姆级指南**：面向新手的从零安装、国内模型代理及排错教程 |

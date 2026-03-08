@@ -37,6 +37,7 @@ graph TD
 
 | 文档 | 核心亮点 | 链接 |
 |:-----|:---------|:-----:|
+| **阿里云部署生产助理** | 轻量服 + `qwen-max` + 钉钉流式 + 代理转发脚本 | [查看](./ai-coding/实战篇-阿里云轻量服部署OpenClaw钉钉助理.md) |
 | **大模型黑话词典** | 小白必读！告别晦涩算法，掌握结对编程黑话 | [查看](./ai-coding/AI-Coding-实战词汇宝典.md) |
 | **MCP Server 开发实战** | 手把手 TypeScript 编写本地读写插件 | [查看](./ai-coding/实战篇-开发我的第一个-MCP-Server.md) |
 | **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/claude-code-guide.md) |
