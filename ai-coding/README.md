@@ -12,6 +12,7 @@
 | [实战篇：Claude Code 保姆级安装指南](./实战篇-Claude-Code-保姆级安装与使用指南.md) | 专为 0 基础小白准备的官方 AI 编程助手使用手册，包含国内换脑接 DeepSeek/智谱的详细避坑教程。 |
 | [Claude-Code-MCP-从入门到精通.md](./Claude-Code-MCP-从入门到精通.md) | **MCP 协议完全指南**：涵盖核心概念、TypeScript/Python 开发及安全实战 |
 | [Claude-Code-Skills-从入门到精通.md](./Claude-Code-Skills-从入门到精通.md) | **Skills 扩展机制完全指南**：涵盖自动化钩子、动态上下文与高级重构模式 |
+| [实战篇-Claude-Code-Skills-高级运用与场景实战.md](./实战篇-Claude-Code-Skills-高级运用与场景实战.md) | **Skills 进阶应用与架构指南**：详解五大实用工作流模式与企业级分发规范 |
 | [OpenClaw-从入门到精通.md](./OpenClaw-从入门到精通.md) | **OpenClaw 助手平台**：涵盖 Mermaid 架构、本地 LLM (Ollama) 及国内 IM 对接 |
 | [Markdown-从入门到精通.md](./Markdown-从入门到精通.md) | **Markdown 语法完全指南**：基础、扩展、高级技巧、Mermaid 图表与最佳实践 |
 

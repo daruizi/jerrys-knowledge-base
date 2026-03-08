@@ -43,6 +43,7 @@ graph TD
 | **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/实战篇-Claude-Code-保姆级安装与使用指南.md) |
 | **MCP 协议完全通关** | TypeScript/Python 开发、多模型连接 | [查看](./ai-coding/Claude-Code-MCP-从入门到精通.md) |
 | **Skills 高级进阶** | 自动化拦截 (Hooks)、子代理 (Fork) | [查看](./ai-coding/Claude-Code-Skills-从入门到精通.md) |
+| **Skills 实战架构** | 五大高阶自动化工作流、API分发与工程指南 | [查看](./ai-coding/实战篇-Claude-Code-Skills-高级运用与场景实战.md) |
 | **OpenClaw 全能助手** | **飞书/钉钉集成**、Canvas、本地 LLM | [查看](./ai-coding/OpenClaw-从入门到精通.md) |
 | **Markdown 权威指南** | Mermaid、GitHub Alerts、排版规范 | [查看](./ai-coding/Markdown-从入门到精通.md) |
 
