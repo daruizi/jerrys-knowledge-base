@@ -126,18 +126,19 @@ nano ~/.openclaw/openclaw.json
 ### 第一步：在钉钉建一个接收群
 1. 在钉钉里建一个普通的内部群（把你和要接收消息的老板/同事拉进去）。
 2. 点击群设置 -> “智能群助手” -> “添加机器人” -> 选择“自定义 (通过 Webhook 接入)”。
-3. 机器人名字叫“项目通报”，安全设置选择“加签”，复制出 `Webhook 地址` 和 `加签密钥 (SEC 开头)`。
+3. 机器人名字叫“项目通报”。
+4. 🔴 **【致命防坑警告】**：在“安全设置”中，**只能勾选“加签”这一个选项！绝对不要勾选“自定义关键词”或“IP地址段”**，否则后续发送 100% 会被钉钉拦截报错！
+5. 复制出 `Webhook 地址` 和 `加签密钥 (SEC 开头)`。
 
-### 第二步：在服务器上写一个真实的发送脚本
-在服务器终端依次输入：
+### 第二步：在服务器上一键生成发送脚本 (免编辑器版)
+很多小白用文本编辑器粘贴 Python 代码时，经常遭遇“格式缩进错乱”导致运行失败。
+为了绝对安全，我们**不用任何编辑器**。请直接在黑终端里**一次性复制、粘贴下面这一大块全部代码，然后猛敲回车！**
+
+*(注意：在这个大方块里，先把你刚刚获取的 `Webhook` 和 `加签密钥` 替换进去，再去服务器里执行👇)*
+
 ```bash
-mkdir -p ~/my-tools && cd ~/my-tools
-nano forward.py
-```
-
-将以下 Python 脚本全选复制进去。这个脚本是真实能给你的群发消息的代码：
-
-```python
+mkdir -p ~/my-tools
+cat << 'EOF' > ~/my-tools/forward.py
 import sys
 import json
 import urllib.request
@@ -147,10 +148,10 @@ import hashlib
 import base64
 import urllib.parse
 
-# ===== 请在这里填入你刚刚在钉钉群获取的 Webhook URL 和 密钥 =====
+# ===== 请务必确认下面两行填上了你真实的 URL 和 SEC 密钥 =====
 WEBHOOK_URL = "https://oapi.dingtalk.com/robot/send?access_token=你的Token"
 SECRET = "SEC你的加签密钥"
-# ==============================================================
+# =======================================================
 
 def send_dingtalk_msg(content):
     timestamp = str(round(time.time() * 1000))
@@ -163,9 +164,11 @@ def send_dingtalk_msg(content):
     url = f"{WEBHOOK_URL}&timestamp={timestamp}&sign={sign}"
     
     headers = {'Content-Type': 'application/json'}
+    # 在 Python 里安全地拼接 AI 的总结抬头，绝不可让在 Shell 下传复杂的换行符
+    final_text = "【🤖 AI提炼总结】\n\n" + content
     data = {
         "msgtype": "text",
-        "text": {"content": content}
+        "text": {"content": final_text}
     }
     
     req = urllib.request.Request(url=url, data=json.dumps(data).encode('utf-8'), headers=headers)
@@ -177,31 +180,31 @@ def send_dingtalk_msg(content):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        refined_message = sys.argv[1]
-        send_dingtalk_msg(refined_message)
+        # sys.argv[1] 接收的是 AI 传过来的纯净文本
+        send_dingtalk_msg(sys.argv[1])
     else:
         print("未提供消息内容")
+EOF
 ```
 
-粘贴完成后，同样我们要保存它：
-1. 按下键盘 `Ctrl + O`，代表保存。
-2. 按 `Enter` 回车确认。
-3. 按 `Ctrl + X` 退出编辑器。
-*(注意：务必把上面代码里大写的 `WEBHOOK_URL` 和 `SECRET` 两行，替换成你在钉钉群里刚刚复制出来的真实链接和密钥！)*
+如果你粘贴完按了回车，且没有报错，说明文件已经完美生成！
 
-### 插入验证：手动试运行脚本 (极其重要)
-在把脚本交给大模型之前，我们先自己测试一下配置是否正确。在终端里直接敲击：
+### 插入验证：手动试运行脚本 (极其重要！)
+在把这支“枪”交给大模型之前，我们先自己开一枪测试一下。在终端里直接敲击：
 ```bash
 python3 ~/my-tools/forward.py "这是一条来自我亲手测试的服务器消息！"
 ```
-如果你立刻在钉钉群里看到了这句话，并在黑框里看到了“消息已成功推送”的回执，说明你的“机械臂”已经完好！接下来只需要将它接入 AI 的大脑即可。
+如果按下回车后，你的钉钉群里立刻弹出了类似“【🤖 AI提炼总结】 这是一条来自...”的卡片，并且黑框提示“消息已成功推送”，说明通道彻底打通！
 
-### 第三步：给大模型下达“操作秘籍”规则
+### 第三步：给大模型下达“安全操作”规则
 
-再次打开配置文件：`nano ~/.openclaw/openclaw.json`，修改 `systemPrompt` 这一行，告诉它怎么用这个脚本：
+现在，我们需要去修改一开始配好的 `openclaw.json`，把下面这段最精简、最防报错的“系统提示词”教给它。
+在终端执行：`nano ~/.openclaw/openclaw.json`
+
+找到 `systemPrompt` 那一行，修改为：
 
 ```json
-    "systemPrompt": "你是一个职场办公助理。你的核心工作是帮我提炼长段的会议纪要或凌乱的想法。如果我在对话中要求你把提炼后的内容进行【转发/发送/报告】，请你主动思考提要，并通过执行 `python3 ~/my-tools/forward.py \"【AI提炼总结】\n\n整理后的具体内容\"` 命令来完成自动推送到群的任务。",
+    "systemPrompt": "你是一个职场办公助理。如果我要求你把总结内容【发送/通报】出去，请严格使用单行文本进行总结（不要包含复杂换行或特殊引号），然后执行 `python3 ~/my-tools/forward.py \"你的纯文本总结\"` 命令来完成自动推送到群的任务。",
 ```
 
 ---
