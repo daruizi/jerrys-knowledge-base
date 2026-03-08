@@ -63,7 +63,7 @@ graph TD
 
 ## 📝 最近动态
 
-- **2026-03-08**: 深度优编《GitHub 与版本控制完全指南》(增补 .gitignore/SSH/Fork)、《AI Coding 实战词汇宝典》、《npm 与包管理完全指南》(新增 nrm/nvm/package.json)、《OpenClaw 钉钉助理部署指南》。
+- **2026-03-08**: 深度优编《GitHub 与版本控制完全指南》(增补 .gitignore/SSH/Fork/Actions/Pages)、《AI Coding 实战词汇宝典》、《npm 与包管理完全指南》(新增 nrm/nvm/package.json)、《OpenClaw 钉钉助理部署指南》。
 - **2026-03-07**: 完成 `ai-coding` 系列文档深度重构，新增国内 IM 对接方案与高级扩展教程。
 - **2026-03-07**: 优化项目根目录结构，引入 Mermaid 架构展示。
 

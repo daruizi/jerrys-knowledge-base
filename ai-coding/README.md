@@ -35,7 +35,7 @@
 | 2026-03-07 | 完成《Claude Code - MCP 从入门到精通》核心协议教程 |
 | 2026-03-07 | 完成《Claude Code - Skills 从入门到精通》高级扩展教程 |
 | 2026-03-07 | 完成《OpenClaw 从入门到精通》多渠道助手平台教程 |
-| 2026-03-08 | 新增《新手必学：GitHub 与版本控制完全指南》(增补 .gitignore/SSH/Fork) 及《Claude Skills 高级运用实战指南》，并深度优化词汇宝典、npm 新手指南 与 OpenClaw 部署配置 |
+| 2026-03-08 | 新增《新手必学：GitHub 与版本控制完全指南》(增补 Actions/Pages/SSH/.gitignore/Fork) 及《Claude Skills 高级运用实战指南》，并深度优化词汇宝典、npm 新手指南 与 OpenClaw 部署配置 |
 
 ---
 
