@@ -40,6 +40,7 @@ graph TD
 | **阿里云部署生产助理** | 轻量服 + `qwen-max` + 钉钉流式 + 代理转发脚本 | [查看](./ai-coding/实战篇-阿里云轻量服部署OpenClaw钉钉助理.md) |
 | **大模型黑话词典** | 小白必读！告别晦涩算法，掌握结提示工程常用语 | [查看](./ai-coding/AI-Coding-实战词汇宝典.md) |
 | **npm 新手必备指南** | 图文并茂！用大白话彻底搞懂 npm 那些吓人的全英文报错 | [查看](./ai-coding/新手必学-npm-与包管理完全指南.md) |
+| **GitHub 入门到精通** | 零基础扫盲！用单机游戏存档的逻辑，摧毁对 Git 命令的恐惧 | [查看](./ai-coding/新手必学-GitHub-与版本控制完全指南.md) |
 | **MCP Server 开发实战** | 手把手 TypeScript 编写本地读写插件 | [查看](./ai-coding/实战篇-开发我的第一个-MCP-Server.md) |
 | **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/实战篇-Claude-Code-保姆级安装与使用指南.md) |
 | **MCP 协议完全通关** | TypeScript/Python 开发、多模型连接 | [查看](./ai-coding/Claude-Code-MCP-从入门到精通.md) |
@@ -62,7 +63,7 @@ graph TD
 
 ## 📝 最近动态
 
-- **2026-03-08**: 深度优编《AI Coding 实战词汇宝典》、《npm 与包管理完全指南》(新增 nrm/nvm/package.json)、《OpenClaw 钉钉助理部署指南》并新增《Claude Skills 高级运用与场景实战》。
+- **2026-03-08**: 新增《新手必学：GitHub 与版本控制完全指南》，并深度优编《AI Coding 实战词汇宝典》、《npm 与包管理完全指南》(新增 nrm/nvm/package.json)、《OpenClaw 钉钉助理部署指南》。
 - **2026-03-07**: 完成 `ai-coding` 系列文档深度重构，新增国内 IM 对接方案与高级扩展教程。
 - **2026-03-07**: 优化项目根目录结构，引入 Mermaid 架构展示。
 
