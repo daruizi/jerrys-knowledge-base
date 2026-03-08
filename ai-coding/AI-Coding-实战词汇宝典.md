@@ -39,7 +39,7 @@
 如果你在使用 OpenClaw，或者自己用 Python/Node 写脚本调用大模型，这些词必须烂熟于心。
 
 ### 1. Token (词元)
-**释义**：大模型计费和处理文字的**最小计算单位**。在英文中，通常 1 个单词 = 1.3 个 Token；在中文里，通常 1 个汉字 = 1~2 个 Token（取决于模型配置）。
+**释义**：大模型计费和处理文字的**最小计算/存储碎片**。不要把它等同于“一个字”。在现代大模型（如 Qwen, DeepSeek）优秀的中文分词器下，通常 1 个汉字 = 0.5~1 个 Token。
 **实战语境**：“这哪怕开源模型再便宜，你一次性把几百万个 Token 的项目全塞给它阅读，API 账单也会爆炸的。”
 
 ### 2. Context Window (上下文窗口)
@@ -54,9 +54,18 @@
 **释义**：让 AI 像打字机一样，想出一个字就吐出一个字的技术，而不是等了几十秒才一次性给出完整的长篇大论。
 **实战语境**：“我们现在的聊天 UI 体验太差了，用户等得以为卡死了，赶紧把接口改成 Streaming 模式首字秒出。”
 
-### 5. Rate Limit (并发拦截 / 速率限制)
+### 5. Prompt Caching (提示词/上下文缓存)
+**释义**：长文本时代（2024年底兴起）的降本杀手锏。当你频繁向模型（如 Claude 或 DashScope）发送相同的超大 Context（如你的整个系统架构源码）时，API 平台会自动在内存中缓存这段阅读记忆。第二次提问时，不仅速度起飞，计费也会呈断崖式下跌（通常下降 50%~90%）。
+**实战语境**：“我们把系统的核心知识库挂在提示词头部，千万别乱改里面的字，这样就能一直击中 Prompt Caching，省钱又极速响应。”
+
+### 6. Rate Limit (并发拦截 / 速率限制)
 **释义**：AI 厂商为了防刷接口，限制你每分钟能发几次请求 (RPM)，或每分钟能消耗多少 Token (TPM)。
-**实战语境**：“程序崩溃了！原来是我们在循环里高频调用 OpenAI 的接口，触发了 Rate Limit 的 429 报错。”
+**实战语境**：“程序崩溃了！原来是我们在循环里高频调用接口，触发了 Rate Limit 的 429 报错。”
+
+### 7. Reasoning Model (推理模型 / 慢思考模型)
+**释义**：2025年最新范式（如 OpenAI o1, DeepSeek R1）。区别于传统的“快答模型”，它能在给出最终答案前，生成一段内化的“思维链树 (Think Block)”。
+> ⚠️ **实战大坑**：面对推理模型，**极其忌讳**再给它写那种繁琐的、充满 Few-shot 示例的保姆级 Prompt。你只需要告诉它**“最终目标(What)”**，怎么推演实现**“(How)”**让它自己去“慢思考”！
+**实战语境**：“用 DeepSeek R1 解这种高阶算法题，不要去干涉它的解题流，丢一个干瘪的需求过去，等它在后台疯狂转圈慢慢 Reasoning 完就行了。”
 
 ---
 
@@ -93,7 +102,9 @@
 | 动词 (推荐) | 释义 | 实战 Prompt 示例 |
 |:---|:---|:---|
 | **Explain** | 解释逻辑 | "Explain the logic of this regex in pure Chinese." (用纯中文解释这段正则) |
+| **Review** | 代码审查 | "Review this Pull Request and point out any potential security vulnerabilities." (审查这段代码并指出所有潜在的安全漏洞) |
 | **Refactor** | 重构代码 | "Refactor this huge function into 3 smaller, independent helpers." (把这个屎山函数重构为3个独立的方法) |
+| **Translate** | 语言迁移 | "Translate this old Python 2 script into a modern TypeScript Node.js module." (把这个旧的 Python 脚本翻译成现代 TS 模块) |
 | **Scaffold** | 搭脚手架 | "Scaffold a standard React component with Tailwind CSS." (快速帮我搭一个带Tailwind的React组件架子) |
 | **Debug** | 调试纠错 | "I'm getting a `TypeError: undefined` here. Help me debug this issue." (帮我调试一下这个未定义的报错) |
 | **Optimize** | 优化性能 | "Optimize this sorting algorithm to run in O(n log n) time." (把这个排序算法的复杂度优化到 O(n log n)) |
