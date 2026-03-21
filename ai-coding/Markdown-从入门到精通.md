@@ -34,8 +34,9 @@
    - [数学公式](#数学公式)
    - [Mermaid 图表](#mermaid-图表)
    - [目录生成](#目录生成)
-5. [最佳实践](#最佳实践)
-6. [常用编辑器与工具](#常用编辑器与工具)
+5. [AI 时代：Prompt 与大模型协同](#ai-时代prompt-与大模型协同)
+6. [最佳实践](#最佳实践)
+7. [常用编辑器与工具](#常用编辑器与工具)
 
 ---
 
@@ -1142,6 +1143,50 @@ classDiagram
 
 ---
 
+## AI 时代：Prompt 与大模型协同
+
+在 AI 辅助编程（AI Coding）时代，Markdown 的战略地位不仅是“排版语言”，更是**人机交互的最强通用协议**。各大模型平台（Claude、GPT、Gemini）原生支持且理解程度最高的格式就是 Markdown。
+
+### 1. 结构化 Prompt (提示词工程)
+
+当你向 AI 提问时，使用 Markdown 结构能大幅提升 AI 输出的准确度和代码片段的质量：
+
+```markdown
+# 角色
+你是一个资深的 React 前端系统架构师。
+
+# 任务
+帮我重构 Login 组件，剥离冗余的状态逻辑。
+
+# 约束条件
+- [x] 必须使用 TypeScript 强类型
+- [x] 坚决不要修改现有的 TailwindCSS 类名
+- [ ] 若遇到 NPM 依赖版本冲突，请先挂起并询问我
+```
+> **高阶玩法优势**：层级分明的标题、加粗和任务列表，能强迫 AI 把注意力聚焦在约束条件上，极大程度规避了常见的大模型幻觉或“发散乱改”问题。
+
+### 2. 作为项目的“大脑全局外挂” (CLAUDE.md)
+
+现代 AI 编程终端（如 Cursor、Claude Code、Gemini CLI）在挂载并打开你的整个项目阵列时，会**自动优先扫描特定的全局设定 Markdown 文件**（例如 `CLAUDE.md` 或 `GEMINI.md`）。
+我们可以利用这个特性，把项目的“家规”无缝注入进 AI 的核心意识里：
+
+```markdown
+# 我们的企业级代码规范
+1. 所有组件全部存放在 `src/components/` 下。
+2. 样式一律采用全局 TailwindCSS，禁用内联 style！
+3. 网络请求一律使用封装好的 `utils/request.ts`。
+```
+> 这样一来，AI 每次进项目就像读过你的入职员工手册一样，产出的代码不会违背你的框架规范！
+
+### 3. 指挥 AI 画图 (Mermaid 魔法)
+
+如果你不知道上面那几页复杂的 Mermaid 语言或甘特图怎么手写，但又需要一张高大上的时序图给老板汇报？利用 Markdown 做桥梁，你只需要在对话框说一句：
+> *"请用 Markdown 的 Mermaid 格式，帮我渲染一张展示【从客户端请求到 Nginx 转发再到分布式数据库】的高性能后端架构时序图。"*
+
+AI 会直接把极其优雅的流程图源码吐给你，粘贴进任何支持 Markdown 的阅读器（如 GitHub、Typora）即可秒出图！
+
+---
+
 ## 最佳实践
 
 ### 1. 保持一致性
@@ -1188,6 +1233,7 @@ classDiagram
 
 | 编辑器 | 特点 | 平台 |
 |--------|------|------|
+| [Cursor](https://cursor.com/) | 专为 AI 编程打造，内置 AI 深度上下文辅写神技 | Windows / macOS / Linux |
 | [VS Code](https://code.visualstudio.com/) | 强大的扩展生态，内置预览 | Windows / macOS / Linux |
 | [Typora](https://typora.io/) | 所见即所得，极简体验 | Windows / macOS / Linux |
 | [Obsidian](https://obsidian.md/) | 双向链接，知识图谱 | Windows / macOS / Linux |
