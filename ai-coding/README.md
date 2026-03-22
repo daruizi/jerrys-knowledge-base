@@ -12,6 +12,7 @@
 | [新手必学-GitHub-与版本控制完全指南.md](./新手必学-GitHub-与版本控制完全指南.md) | **GitHub 大白话扫盲**：用单机游戏存档比喻，击碎命令恐惧，按使用频率梳理极简连招 |
 | [实战篇-开发我的第一个-MCP-Server.md](./实战篇-开发我的第一个-MCP-Server.md) | **MCP 开发从 0 到 1**：手把手带练，用 TypeScript 写一个能读写本地硬盘的“私人笔记助手” |
 | [实战篇：Claude Code 保姆级安装指南](./实战篇-Claude-Code-保姆级安装与使用指南.md) | 专为 0 基础小白准备的官方 AI 编程助手使用手册，包含国内换脑接 DeepSeek/智谱的详细避坑教程。 |
+| [Claude-Code-命令与快捷键速查手册.md](./Claude-Code-命令与快捷键速查手册.md) | **Claude Code 权威速查**：涵盖最新全量保留斜杠命令、CLI 参数及交互式快捷键全列表 |
 | [Claude-Code-MCP-从入门到精通.md](./Claude-Code-MCP-从入门到精通.md) | **MCP 协议完全指南**：涵盖核心概念、TypeScript/Python 开发及安全实战 |
 | [Claude-Code-Skills-从入门到精通.md](./Claude-Code-Skills-从入门到精通.md) | **Skills 扩展机制完全指南**：涵盖自动化钩子、动态上下文与高级重构模式 |
 | [实战篇-Claude-Code-Skills-高级运用与场景实战.md](./实战篇-Claude-Code-Skills-高级运用与场景实战.md) | **Skills 进阶应用与架构指南**：详解五大实用工作流模式与企业级分发规范 |

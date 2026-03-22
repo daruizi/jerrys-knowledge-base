@@ -44,6 +44,7 @@ graph TD
 | **GitHub 入门到精通** | 零基础扫盲！用单机游戏存档的逻辑，摧毁对 Git 命令的恐惧 | [查看](./ai-coding/新手必学-GitHub-与版本控制完全指南.md) |
 | **MCP Server 开发实战** | 手把手 TypeScript 编写本地读写插件 | [查看](./ai-coding/实战篇-开发我的第一个-MCP-Server.md) |
 | **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/实战篇-Claude-Code-保姆级安装与使用指南.md) |
+| **Claude Code 速查手册** | CLI参数、斜杠命令、高级快捷键全指南 | [查看](./ai-coding/Claude-Code-命令与快捷键速查手册.md) |
 | **MCP 协议完全通关** | TypeScript/Python 开发、多模型连接 | [查看](./ai-coding/Claude-Code-MCP-从入门到精通.md) |
 | **Skills 高级进阶** | 自动化拦截 (Hooks)、子代理 (Fork) | [查看](./ai-coding/Claude-Code-Skills-从入门到精通.md) |
 | **Skills 实战架构** | 五大高阶自动化工作流、API分发与工程指南 | [查看](./ai-coding/实战篇-Claude-Code-Skills-高级运用与场景实战.md) |
