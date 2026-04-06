@@ -19,7 +19,7 @@
 | [OpenClaw-从入门到精通.md](./OpenClaw-从入门到精通.md) | **OpenClaw 助手平台**：涵盖 Mermaid 架构、本地 LLM (Ollama) 及国内 IM 对接 |
 | [实战篇-Gemini-CLI-保姆级安装与使用指南.md](./实战篇-Gemini-CLI-保姆级安装与使用指南.md) | **Gemini CLI 全能指南**：谷歌原生 AI 助手安装、Token 监控、全指令详解及 `GEMINI.md` 实战 |
 | [Markdown-从入门到精通.md](./Markdown-从入门到精通.md) | **Markdown 语法完全指南**：基础、扩展、高级技巧、Mermaid 图表，**包含 AI 时代提示词工程与大模型协同指南** |
-| [21天-Python-TypeScript-全栈入门计划.md](./21天-Python-TypeScript-全栈入门计划.md) | **21天全栈学习路线**：CS 背景快速入门，每天 1 小时，Python 后端 → TS 前端 → Next.js 全栈 → AI API 集成，每天有明确交付物 |
+| [21天全栈学习/](./21天全栈学习/) | **21天全栈学习路线**：CS 背景快速入门，每天 1 小时，含学习计划总览 + Day 01-07 Python 后端完整讲义（持续更新） |
 
 ## 📚 学习主题
 
