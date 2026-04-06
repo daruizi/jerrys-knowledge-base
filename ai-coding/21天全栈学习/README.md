@@ -27,10 +27,22 @@
 
 ## 第三阶段：TypeScript / Node.js（Day 12-17）
 
-> 讲义待更新
+| 讲义 | 核心内容 | 交付物 |
+|------|----------|--------|
+| [Day 12 — TypeScript 核心语法](./Day12-TypeScript核心语法.md) | 类型系统、interface、泛型、函数类型 | `data_transform.ts` |
+| [Day 13 — 异步与 HTTP](./Day13-异步与HTTP.md) | Promise、async/await、fetch、并发控制 | `batch_fetch.ts` |
+| [Day 14 — React 基础](./Day14-React基础.md) | 组件、props、useState、useEffect | `user_list/` |
+| [Day 15 — React 数据表格 & Tailwind](./Day15-React数据表格与Tailwind.md) | Tailwind CSS、useMemo、分页、排序 | `data_table/` |
+| [Day 16 — Next.js 入门 & API 路由](./Day16-Nextjs入门与API路由.md) | App Router、Server/Client Component、Route Handler | `scraper_dashboard/` |
+| [Day 17 — 前后端联调](./Day17-前后端联调.md) | CORS、环境变量、Next.js API 代理 | `fullstack_quotes/` |
 
 ## 第四阶段：全栈整合 + AI 辅助（Day 18-21）
 
-> 讲义待更新
+| 讲义 | 核心内容 | 交付物 |
+|------|----------|--------|
+| [Day 18 — AI 数据提炼](./Day18-AI数据提炼.md) | Anthropic SDK、system prompt、结构化 JSON 输出 | `ai_extractor.py` |
+| [Day 19 — 完整自动化平台](./Day19-完整自动化平台.md) | 爬虫 + AI + FastAPI + Next.js 全链路 | `platform/` |
+| [Day 20 — 部署 & 定时触发](./Day20-部署与定时触发.md) | Vercel、Railway、GitHub Actions cron | 部署 URL / workflow.yml |
+| [Day 21 — 个人项目启动](./Day21-个人项目启动.md) | 技能自检、项目方向选择、CLAUDE.md 模板 | 个人项目 repo |
 
 > 📅 最后更新：2026-04-06
