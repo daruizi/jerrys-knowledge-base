@@ -421,7 +421,159 @@ python3 robust_processor.py data/scores.txt  # 类型错误
 
 ---
 
-## 六、代码要点回顾
+## 六、assert — 开发期断言
+
+`assert` 用于检查程序内部的不变量（invariants），是防御性编程的轻量工具：
+
+```python
+def divide(a: float, b: float) -> float:
+    assert b != 0, f"除数不能为零，得到 b={b}"
+    return a / b
+
+def process_batch(items: list) -> None:
+    assert isinstance(items, list), f"期望 list，得到 {type(items)}"
+    assert len(items) > 0, "列表不能为空"
+    # ...
+
+# ✅ 正确用法：检查程序内部逻辑假设
+# ❌ 错误用法：验证用户输入（assert 可被 python -O 关闭）
+
+# 生产代码中对用户输入用 raise ValueError，不用 assert
+def set_age(age: int) -> None:
+    if not 0 <= age <= 150:
+        raise ValueError(f"年龄无效: {age}")
+```
+
+---
+
+## 七、warnings — 弃用与警告
+
+```python
+import warnings
+
+# 发出警告（不中断程序）
+def old_function():
+    warnings.warn(
+        "old_function 已弃用，请使用 new_function",
+        DeprecationWarning,
+        stacklevel=2  # 警告指向调用者，而不是这个函数内部
+    )
+    return new_function()
+
+# 控制警告过滤
+warnings.filterwarnings("ignore", category=DeprecationWarning)  # 忽略
+warnings.filterwarnings("error", category=UserWarning)           # 当错误
+
+# 常用警告类型
+# DeprecationWarning  — 功能已弃用
+# UserWarning         — 一般性警告
+# RuntimeWarning      — 运行时异常情况（如 0/0 = nan）
+# FutureWarning       — 未来版本行为将改变
+```
+
+---
+
+## 八、contextlib — 上下文管理器工具
+
+```python
+from contextlib import suppress, contextmanager, ExitStack
+
+# suppress：静默特定异常（代替 try/except/pass）
+# 传统写法
+try:
+    import ujson as json
+except ImportError:
+    import json
+
+# 使用 suppress
+with suppress(ImportError):
+    import ujson as json  # 失败就算了，继续用标准 json
+
+# suppress 也可以用于文件操作
+with suppress(FileNotFoundError):
+    Path("temp.txt").unlink()  # 删除临时文件，不存在也没关系
+
+# @contextmanager — 用生成器函数创建上下文管理器
+@contextmanager
+def timer(label: str = ""):
+    """计时上下文管理器"""
+    import time
+    start = time.perf_counter()
+    try:
+        yield  # 在这里暂停，执行 with 块内的代码
+    finally:
+        elapsed = time.perf_counter() - start
+        print(f"{label} 耗时: {elapsed:.3f}s")
+
+with timer("数据处理"):
+    # ... 执行一些操作
+    import time; time.sleep(0.1)
+
+# @contextmanager 结合异常处理
+@contextmanager
+def managed_connection(host: str, port: int):
+    """模拟数据库连接管理"""
+    conn = None
+    try:
+        print(f"连接到 {host}:{port}")
+        conn = {"host": host, "port": port}  # 模拟连接对象
+        yield conn
+    except Exception as e:
+        print(f"连接期间发生错误: {e}")
+        raise
+    finally:
+        if conn:
+            print("关闭连接")
+
+with managed_connection("localhost", 5432) as conn:
+    print(f"使用连接: {conn}")
+
+# ExitStack — 动态管理多个上下文
+def process_files(filepaths: list[str]) -> None:
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(f)) for f in filepaths]
+        # 所有文件会在 with 块结束时自动关闭
+        for f in files:
+            print(f.readline())
+```
+
+---
+
+## 九、ExceptionGroup（Python 3.11+）
+
+用于同时处理多个并发任务抛出的多个异常：
+
+```python
+# ExceptionGroup 把多个异常打包在一起
+def validate_form(data: dict) -> None:
+    errors = []
+    if not data.get("name"):
+        errors.append(ValueError("姓名不能为空"))
+    if not data.get("email") or "@" not in data["email"]:
+        errors.append(ValueError("邮件格式无效"))
+    if len(data.get("password", "")) < 8:
+        errors.append(ValueError("密码至少8位"))
+
+    if errors:
+        raise ExceptionGroup("表单验证失败", errors)
+
+# except* 分别处理组内各个异常类型
+try:
+    validate_form({"name": "", "email": "bad", "password": "123"})
+except* ValueError as eg:
+    for exc in eg.exceptions:
+        print(f"  验证错误: {exc}")
+# 输出:
+#   验证错误: 姓名不能为空
+#   验证错误: 邮件格式无效
+#   验证错误: 密码至少8位
+```
+
+> ExceptionGroup 主要在 asyncio 并发场景中使用，TaskGroup 失败时会抛出 ExceptionGroup。
+
+---
+
+## 十、代码要点回顾
 
 | 知识点 | 体现 |
 |--------|------|
@@ -431,16 +583,22 @@ python3 robust_processor.py data/scores.txt  # 类型错误
 | 捕获具体异常 | 分别处理 `InvalidFileError` / `ProcessError` / `Exception` |
 | `%s` 格式化 in logging | 延迟求值，性能更好 |
 | 前置验证 | `validate_file()` 在处理前检查所有前提条件 |
+| `assert` | 检查内部逻辑不变量，不用于验证用户输入 |
+| `warnings.warn` | 标记弃用 API，不中断程序 |
+| `contextlib.suppress` | 静默特定异常，替代 try/except/pass |
+| `@contextmanager` | 用生成器函数创建上下文管理器 |
 
 ---
 
-## 七、今日 Checklist
+## 十一、今日 Checklist
 
 - [ ] 理解 `try/except/else/finally` 各自的执行时机
-- [ ] 写过自定义异常类
-- [ ] 用 `logging` 替代 `print` 输出日志
+- [ ] 写过自定义异常类，并携带结构化数据
+- [ ] 用 `logging` 替代 `print`，配置同时输出控制台和文件
+- [ ] 知道 `assert` 和 `raise ValueError` 的使用边界
+- [ ] 能用 `@contextmanager` 写自定义上下文管理器
 - [ ] `robust_processor.py` 能正确处理有效/无效数据
 - [ ] 测试各种错误场景，日志输出正确
 - [ ] git commit：`git add . && git commit -m "day05: robust file processor with logging"`
 
-> 📅 最后更新：2026-04-06
+> 📅 最后更新：2026-04-07

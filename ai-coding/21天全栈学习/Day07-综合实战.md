@@ -47,7 +47,52 @@ from url_collector.fetcher import fetch_urls
 
 ---
 
-## 二、sqlite3 标准库
+## 二、pyproject.toml — 现代项目配置
+
+Python 生态正在从 `setup.py` / `requirements.txt` 迁移到 `pyproject.toml`：
+
+```toml
+# pyproject.toml（放在项目根目录）
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "url-collector"
+version = "0.1.0"
+description = "Async URL collector and title extractor"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.0",
+    "click>=8.1",
+]
+
+[project.scripts]
+url-collector = "url_collector.cli:cli"  # 注册为命令行工具
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.ruff]
+line-length = 100
+```
+
+安装为可编辑包（开发时推荐）：
+
+```bash
+pip install -e .          # 从 pyproject.toml 安装
+pip install -e ".[dev]"   # 含开发依赖
+
+# 安装后可以直接用命令
+url-collector --help
+url-collector fetch https://example.com
+```
+
+---
+
+## 三、sqlite3 标准库
 
 Python 内置 `sqlite3`，无需安装，适合工具脚本的轻量存储。
 
@@ -402,37 +447,116 @@ python3 -m url_collector fetch -f urls.txt
 
 ---
 
-## 五、Python 80% 知识点完成清单
+## 六、Python 80%+ 知识点完成清单
 
-| 知识点 | Day | 状态 |
-|--------|-----|------|
-| 变量/类型/字符串/列表/字典/集合 | 01 | ✅ |
-| 列表/字典推导式 | 01 | ✅ |
-| 函数/默认参数/*args/**kwargs | 02 | ✅ |
-| lambda/map/filter/sorted | 02 | ✅ |
-| 生成器（yield）/迭代器 | 02 | ✅ |
-| class/继承/super() | 03 | ✅ |
-| 魔术方法（__repr__/__iter__等） | 03 | ✅ |
-| 上下文管理器（with） | 03 | ✅ |
-| @classmethod/@staticmethod | 03 | ✅ |
-| @dataclass/@property | 03 | ✅ |
-| pathlib/datetime/json/csv | 04 | ✅ |
-| re 正则表达式 | 04 | ✅ |
-| collections（Counter/defaultdict） | 04 | ✅ |
-| try/except/自定义异常 | 05 | ✅ |
-| logging 模块 | 05 | ✅ |
-| 装饰器（原理+自定义） | 06 | ✅ |
-| async/await/asyncio | 06 | ✅ |
-| 异步 HTTP（httpx async） | 06 | ✅ |
-| 模块/包结构/__init__.py | 07 | ✅ |
-| sqlite3 | 07 | ✅ |
-| click CLI | 07 | ✅ |
+### 基础语法（Day 01）
 
-**Python 核心已覆盖 ~85%。** 未覆盖的 15%（元类、描述符、多进程、C 扩展等）属于高级/专项内容，日常开发极少用到。
+| 知识点 | 内容 | 状态 |
+|--------|------|------|
+| 变量与类型 | str/int/float/bool/None，类型注解 | ✅ |
+| 类型转换 | int()/str()/float()/bool()，边界情况 | ✅ |
+| Truthiness | falsy 值：None/0/""/[]/{}等 | ✅ |
+| 字符串方法 | split/join/strip/replace/find/startswith 等 | ✅ |
+| 数字运算 | ///%/divmod/abs/round，math 模块 | ✅ |
+| 列表 | 切片/解包/extend/copy/浅拷贝陷阱 | ✅ |
+| 字典 | update/pop/setdefault，合并运算符 `|` | ✅ |
+| 集合 | 并/交/差/对称差，frozenset | ✅ |
+| 元组 | 解包，`*rest`，单元素 `(1,)`，作为 key | ✅ |
+| 推导式 | 列表/字典/集合推导式，嵌套推导 | ✅ |
+| 条件循环 | if/elif/else，for/while，enumerate/zip | ✅ |
+| Walrus 运算符 | `:=`，在条件/循环/推导式中使用 | ✅ |
+| match/case | 值匹配，解构，guard 子句，类型匹配 | ✅ |
+
+### 函数与函数式（Day 02）
+
+| 知识点 | 内容 | 状态 |
+|--------|------|------|
+| 函数定义 | 默认参数/可变默认陷阱/关键字参数 | ✅ |
+| *args/**kwargs | 任意参数，解包调用，仅关键字参数 `/` `*` | ✅ |
+| lambda | 匿名函数，配合 sorted/map/filter | ✅ |
+| map/filter/reduce | 高阶函数，functools.reduce | ✅ |
+| 生成器 | yield，惰性求值，内存对比，yield from | ✅ |
+| 迭代器协议 | `__iter__`/`__next__`，StopIteration | ✅ |
+| 闭包 | 自由变量，nonlocal，工厂函数 | ✅ |
+| functools | partial/lru_cache/wraps/reduce | ✅ |
+| itertools | chain/islice/zip_longest/groupby/product/combinations | ✅ |
+| 高阶函数模式 | 函数作参数/返回值，函数组合 | ✅ |
+
+### 面向对象（Day 03）
+
+| 知识点 | 内容 | 状态 |
+|--------|------|------|
+| class/继承/super() | 实例/类变量，方法覆盖 | ✅ |
+| @classmethod/@staticmethod | 工厂方法，工具方法 | ✅ |
+| 多重继承/MRO | 菱形问题，`__mro__`，super()链 | ✅ |
+| @property | getter/setter，计算属性 | ✅ |
+| 魔术方法 | `__repr__/__str__/__eq__/__lt__/__hash__` | ✅ |
+| 容器魔术方法 | `__len__/__getitem__/__setitem__/__contains__` | ✅ |
+| `__call__` | 可调用对象 | ✅ |
+| 运算符重载 | `__add__/__mul__/__abs__` | ✅ |
+| `__slots__` | 内存优化，固定属性列表 | ✅ |
+| @dataclass | 自动生成 init/repr/eq，field/asdict/frozen | ✅ |
+| Enum/StrEnum | 命名常量，auto，迭代，作为 dict key | ✅ |
+| ABC | abstractmethod，强制子类实现 | ✅ |
+| Protocol | 结构化类型，runtime_checkable | ✅ |
+
+### 标准库（Day 04）
+
+| 知识点 | 内容 | 状态 |
+|--------|------|------|
+| pathlib | Path操作，glob，read_text/write_text | ✅ |
+| datetime | now/strptime/strftime，timedelta，时区 | ✅ |
+| re | search/findall/sub，分组，命名分组，flags | ✅ |
+| collections | Counter/defaultdict/namedtuple/deque | ✅ |
+| json/csv | 自定义序列化，DictWriter | ✅ |
+| os/subprocess | environ/getenv，subprocess.run | ✅ |
+| typing | Optional/Union/TypeVar/Generic/Literal/TypedDict | ✅ |
+
+### 错误处理（Day 05）
+
+| 知识点 | 内容 | 状态 |
+|--------|------|------|
+| try/except/else/finally | 完整结构，异常链 `raise from` | ✅ |
+| 自定义异常 | 继承 Exception，携带结构化数据 | ✅ |
+| logging | basicConfig，handler，logger.exception | ✅ |
+| 防御性编程 | isinstance/前置验证/安全访问 | ✅ |
+| assert | 内部不变量检查 vs 用户输入验证 | ✅ |
+| warnings | warn，DeprecationWarning，filterwarnings | ✅ |
+| contextlib | suppress/contextmanager/ExitStack | ✅ |
+| ExceptionGroup | except*，并发任务多异常 | ✅ |
+
+### 装饰器与异步（Day 06）
+
+| 知识点 | 内容 | 状态 |
+|--------|------|------|
+| 装饰器原理 | 函数包裹函数，@wraps | ✅ |
+| 带参数装饰器 | 三层嵌套工厂 | ✅ |
+| 类装饰器 | `__call__` 实现，保持状态 | ✅ |
+| 装饰器堆叠 | 多装饰器执行顺序 | ✅ |
+| HTTP 基础 | 方法/状态码/请求结构 | ✅ |
+| httpx 同步 | Client/get/post/raise_for_status | ✅ |
+| async/await | 协程，asyncio.run，事件循环 | ✅ |
+| asyncio.gather | 并发，return_exceptions | ✅ |
+| asyncio.Semaphore | 并发数控制 | ✅ |
+| asyncio.TaskGroup | Python 3.11+，任务失败自动取消 | ✅ |
+| asyncio.Queue | 生产者消费者模式 | ✅ |
+| httpx 异步 | AsyncClient，async with | ✅ |
+| 环境变量 | dotenv，os.getenv | ✅ |
+
+### 工程实践（Day 07）
+
+| 知识点 | 内容 | 状态 |
+|--------|------|------|
+| 模块/包结构 | `__init__.py`，相对/绝对导入 | ✅ |
+| pyproject.toml | 现代项目配置，脚本注册，可编辑安装 | ✅ |
+| sqlite3 | CRUD，`OR IGNORE`/`ON CONFLICT`，Row 工厂 | ✅ |
+| click CLI | group/command/argument/option/pass_context | ✅ |
+
+**Python 核心已覆盖 ~87%。** 未覆盖的高级内容（元类、描述符、多进程/多线程、C 扩展）属于专项领域，日常开发很少直接用到。
 
 ---
 
-## 六、今日 Checklist
+## 七、今日 Checklist
 
 - [ ] `python3 -m url_collector --help` 显示正确文档
 - [ ] `fetch` 命令成功抓取并存库
@@ -443,7 +567,7 @@ python3 -m url_collector fetch -f urls.txt
 
 ---
 
-## 七、进入 Day 08 前的自检
+## 八、进入 Day 08 前的自检
 
 能回答以下问题说明 Python 阶段掌握扎实：
 
@@ -453,4 +577,4 @@ python3 -m url_collector fetch -f urls.txt
 4. `yield from` 和 `yield` 的区别？
 5. 自定义异常继承 `Exception` 而不是 `BaseException` 的原因？
 
-> 📅 最后更新：2026-04-06
+> 📅 最后更新：2026-04-07
