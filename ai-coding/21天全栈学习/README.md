@@ -22,7 +22,7 @@
 
 | 讲义 | 核心内容 | 交付物 |
 |------|----------|--------|
-| [Day 08 — 静态页面抓取](./Day08-静态页面抓取.md) | HTML/CSS选择器、BeautifulSoup、robots.txt、分页处理 | `book_scraper.py` |
+| [Day 08 — 静态页面抓取](./Day08-静态页面抓取.md) | HTML/CSS选择器、BeautifulSoup、robots.txt、分页/regex数据清洗、CSV+JSON双输出 | `book_scraper.py` |
 | [Day 09 — 动态页面抓取](./Day09-动态页面抓取.md) | Playwright、wait_for_selector、网络拦截、截图调试 | `dynamic_scraper.py` |
 | [Day 10 — 批量下载 & 数据存储](./Day10-批量下载与数据存储.md) | asyncio 并发下载、进度条、hashlib 去重、SQLite 增量存储 | `batch_downloader.py` |
 | [Day 11 — 定时自动化工具](./Day11-定时自动化工具.md) | APScheduler、click 子命令、cron 表达式、JSON 结构化日志 | `auto_scraper/` |
