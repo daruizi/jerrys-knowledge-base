@@ -11,6 +11,7 @@
 ```mermaid
 graph TD
     ROOT[Root] --> AI[ai-coding: AI 辅助编程]
+    ROOT --> HERMES[hermes-agent: Hermes Agent 学习指南]
     ROOT --> PROG[programming: 编程语言*]
     ROOT --> TOOLS[tools: 工具指南*]
     ROOT --> NOTES[notes: 学习笔记*]
@@ -52,6 +53,22 @@ graph TD
 | **Gemini CLI 保姆指南** | **谷歌原生 AI 助手**、多代理并行、规范约束 (GEMINI.md) | [查看](./ai-coding/实战篇-Gemini-CLI-保姆级安装与使用指南.md) |
 | **Markdown 权威指南** | Mermaid、GitHub Alerts、排版规范 | [查看](./ai-coding/Markdown-从入门到精通.md) |
 
+### 🤖 Hermes Agent 学习指南
+
+| 文档 | 核心亮点 | 链接 |
+|:-----|:---------|:-----:|
+| **简介与概述** | Hermes 是什么、核心特性、与同类产品对比 | [查看](./hermes-agent/01-简介与概述.md) |
+| **安装与快速开始** | 一行安装、Provider 选择、第一次对话 | [查看](./hermes-agent/02-安装与快速开始.md) |
+| **核心架构解析** | 系统架构图、数据流、目录结构、设计原则 | [查看](./hermes-agent/03-核心架构解析.md) |
+| **三层记忆系统** | 短期/程序性/长期记忆、Honcho 用户建模 | [查看](./hermes-agent/04-三层记忆系统.md) |
+| **Skills 技能系统** | 技能创建、安装、学习闭环、自定义开发 | [查看](./hermes-agent/05-Skills技能系统.md) |
+| **工具系统** | 61+ 工具、7 种终端后端、MCP 集成 | [查看](./hermes-agent/06-工具系统.md) |
+| **消息平台与网关** | 15+ 平台接入、Telegram/Discord 配置 | [查看](./hermes-agent/07-消息平台与网关.md) |
+| **配置与个性化** | 配置文件、SOUL.md 人格、上下文文件 | [查看](./hermes-agent/08-配置与个性化.md) |
+| **高级功能** | Cron 定时、子 Agent、浏览器、语音、RL 训练 | [查看](./hermes-agent/09-高级功能.md) |
+| **开发者指南** | 插件开发、添加工具、贡献代码 | [查看](./hermes-agent/10-开发者指南.md) |
+| **实用场景与案例** | 社区真实用例、FAQ、最佳实践 | [查看](./hermes-agent/11-实用场景与案例.md) |
+
 ---
 
 ## 🛠️ 项目规范
@@ -66,6 +83,7 @@ graph TD
 
 ## 📝 最近动态
 
+- **2026-05-07**: 新增 `hermes-agent` 目录，完整收录 Hermes Agent 官方文档的中文学习指南（11 个章节，涵盖安装、架构、记忆、技能、工具、消息平台等全部内容）。
 - **2026-03-21**: 深度优化《Markdown 从入门到精通》全语法教程，新增 AI 提示词工程（Prompt）与大模型规范（CLAUDE.md）协同等高阶指南。
 - **2026-03-10**: 新增《Gemini CLI 保姆级安装与使用指南》，涵盖谷歌原生 AI 助手全指令、Token 监控及 `GEMINI.md` 规范。
 - **2026-03-08**: 深度优编《GitHub 与版本控制完全指南》(增补 .gitignore/SSH/Fork/Actions/Pages)、《AI Coding 实战词汇宝典》、《npm 与包管理完全指南》(新增 nrm/nvm/package.json)、《OpenClaw 钉钉助理部署指南》。
@@ -74,5 +92,5 @@ graph TD
 
 ---
 
-> 📅 最后更新：2026-03-21  
+> 📅 最后更新：2026-05-07  
 > 📚 GitHub Repo: [jerrys-knowledge-base](https://github.com/daruizi/jerrys-knowledge-base)
