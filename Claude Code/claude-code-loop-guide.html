@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code /loop 命令完全指南</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --sidebar-w:280px;
+    --header-h:56px;
+    --c-bg:#ffffff;
+    --c-bg-soft:#f6f8fa;
+    --c-bg-code:#f4f4f5;
+    --c-border:#e2e8f0;
+    --c-border-light:#f0f0f0;
+    --c-text:#1a1a2e;
+    --c-text-2:#475569;
+    --c-text-3:#94a3b8;
+    --c-brand:#6366f1;
+    --c-brand-light:#818cf8;
+    --c-brand-bg:#eef2ff;
+    --c-green:#10b981;
+    --c-green-bg:#ecfdf5;
+    --c-orange:#f59e0b;
+    --c-orange-bg:#fffbeb;
+    --c-red:#ef4444;
+    --c-red-bg:#fef2f2;
+    --c-blue:#3b82f6;
+    --c-blue-bg:#eff6ff;
+    --font-sans:"Inter","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    --font-mono:"JetBrains Mono","Fira Code","SF Mono",Consolas,"Liberation Mono",monospace;
+  }
+  html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 24px)}
+  body{font-family:var(--font-sans);color:var(--c-text);background:var(--c-bg);line-height:1.7;font-size:16px;-webkit-font-smoothing:antialiased}
+
+  /* ===== HEADER ===== */
+  .header{position:fixed;top:0;left:0;right:0;height:var(--header-h);background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--c-border);z-index:100;display:flex;align-items:center;padding:0 24px}
+  .header-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;color:var(--c-text)}
+  .header-logo svg{width:28px;height:28px}
+  .header-badge{font-size:11px;background:var(--c-brand-bg);color:var(--c-brand);padding:2px 8px;border-radius:99px;font-weight:600;letter-spacing:.02em}
+  .menu-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;color:var(--c-text)}
+  .menu-toggle:hover{background:var(--c-bg-soft)}
+
+  /* ===== SIDEBAR ===== */
+  .sidebar{position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);background:var(--c-bg);border-right:1px solid var(--c-border);overflow-y:auto;padding:20px 0;z-index:90;transition:transform .25s ease}
+  .sidebar::-webkit-scrollbar{width:3px}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--c-border);border-radius:3px}
+  .nav-group{margin-bottom:6px}
+  .nav-group-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);padding:8px 24px 4px}
+  .nav-link{display:block;padding:6px 24px;font-size:14px;color:var(--c-text-2);text-decoration:none;border-left:2px solid transparent;transition:all .15s ease;line-height:1.5}
+  .nav-link:hover{color:var(--c-brand);background:var(--c-brand-bg);border-left-color:var(--c-brand-light)}
+  .nav-link.active{color:var(--c-brand);font-weight:600;background:var(--c-brand-bg);border-left-color:var(--c-brand)}
+  .nav-link.sub{padding-left:38px;font-size:13px}
+
+  /* ===== MAIN ===== */
+  .main{margin-left:var(--sidebar-w);padding-top:var(--header-h)}
+  .content{max-width:820px;margin:0 auto;padding:40px 48px 120px}
+
+  /* ===== TYPOGRAPHY ===== */
+  h1{font-size:34px;font-weight:800;line-height:1.25;letter-spacing:-.02em;margin-bottom:12px}
+  h2{font-size:24px;font-weight:700;line-height:1.35;margin-top:56px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--c-border);letter-spacing:-.01em}
+  h3{font-size:18px;font-weight:650;line-height:1.4;margin-top:36px;margin-bottom:10px}
+  h4{font-size:15px;font-weight:600;margin-top:24px;margin-bottom:6px}
+  p{margin-bottom:16px;color:var(--c-text-2)}
+  .lead{font-size:17px;color:var(--c-text-2);line-height:1.8;margin-bottom:32px}
+  a{color:var(--c-brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  strong{color:var(--c-text);font-weight:600}
+  ul,ol{margin-bottom:16px;padding-left:24px;color:var(--c-text-2)}
+  li{margin-bottom:6px}
+  li code{font-size:13px}
+
+  /* ===== CODE ===== */
+  code{font-family:var(--font-mono);font-size:13.5px;background:var(--c-bg-code);padding:2px 6px;border-radius:4px;color:#d946ef}
+  pre{background:#1e1e2e;color:#cdd6f4;border-radius:10px;padding:20px 24px;margin-bottom:20px;overflow-x:auto;font-size:13.5px;line-height:1.7;position:relative;border:1px solid #313244}
+  pre code{background:none;color:inherit;padding:0;font-size:inherit}
+  .code-label{position:absolute;top:0;right:0;background:var(--c-brand);color:#fff;font-size:11px;font-weight:600;padding:3px 12px;border-radius:0 9px 0 8px;letter-spacing:.03em;font-family:var(--font-sans)}
+  .code-comment{color:#6c7086}
+  .code-key{color:#89b4fa}
+  .code-str{color:#a6e3a1}
+  .code-num{color:#fab387}
+  .code-bracket{color:#9399b2}
+  .code-kw{color:#cba6f7}
+
+  /* ===== CALLOUTS ===== */
+  .callout{border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;font-size:14.5px;line-height:1.65;border:1px solid}
+  .callout-icon{flex-shrink:0;width:22px;height:22px;margin-top:1px}
+  .callout.tip{background:var(--c-green-bg);border-color:#bbf7d0;color:#166534}
+  .callout.warn{background:var(--c-orange-bg);border-color:#fde68a;color:#92400e}
+  .callout.danger{background:var(--c-red-bg);border-color:#fecaca;color:#991b1b}
+  .callout.info{background:var(--c-blue-bg);border-color:#bfdbfe;color:#1e40af}
+
+  /* ===== TABLE ===== */
+  .table-wrap{overflow-x:auto;margin-bottom:20px;border-radius:10px;border:1px solid var(--c-border)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  thead{background:var(--c-bg-soft)}
+  th{text-align:left;padding:10px 16px;font-weight:650;color:var(--c-text);border-bottom:1px solid var(--c-border);white-space:nowrap}
+  td{padding:10px 16px;border-bottom:1px solid var(--c-border-light);color:var(--c-text-2);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--c-bg-soft)}
+
+  /* ===== DIAGRAM ===== */
+  .diagram{background:var(--c-bg-soft);border:1px solid var(--c-border);border-radius:12px;padding:28px 32px;margin-bottom:24px;text-align:center}
+  .diagram-title{font-size:13px;font-weight:600;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+
+  /* ===== CARDS GRID ===== */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .card{border:1px solid var(--c-border);border-radius:10px;padding:20px;background:var(--c-bg)}
+  .card h4{margin:0 0 6px;font-size:15px;font-weight:650}
+  .card p{font-size:13.5px;margin:0;line-height:1.6}
+  .card-icon{font-size:24px;margin-bottom:8px}
+
+  /* ===== FLOW DIAGRAM ===== */
+  .flow-row{display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+  .flow-box{border-radius:10px;padding:12px 20px;font-size:14px;font-weight:500;border:1px solid;text-align:center;min-width:120px}
+  .flow-arrow{color:var(--c-text-3);font-size:20px;font-weight:700}
+  .flow-user{background:#eef2ff;border-color:#c7d2fe;color:#4338ca}
+  .flow-claude{background:#fef3c7;border-color:#fde68a;color:#92400e}
+  .flow-tool{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
+  .flow-result{background:#f1f5f9;border-color:#e2e8f0;color:#475569}
+
+  /* ===== MODE COMPARE ===== */
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .mode-card{border-radius:12px;padding:22px;border:1px solid}
+  .mode-card h4{margin:0 0 10px;font-size:16px;font-weight:700}
+  .mode-card p{font-size:13.5px;margin:0 0 8px;line-height:1.6;color:var(--c-text-2)}
+  .mode-card ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--c-text-2)}
+  .mode-card li{margin-bottom:4px}
+  .mode-fixed{background:var(--c-blue-bg);border-color:#bfdbfe}
+  .mode-dynamic{background:var(--c-green-bg);border-color:#bbf7d0}
+  .mode-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 10px;border-radius:99px;margin-bottom:10px}
+  .mode-fixed .mode-badge{background:var(--c-blue);color:#fff}
+  .mode-dynamic .mode-badge{background:var(--c-green);color:#fff}
+
+  /* ===== FOOTER ===== */
+  .footer{margin-left:var(--sidebar-w);padding:24px 48px;border-top:1px solid var(--c-border);text-align:center;color:var(--c-text-3);font-size:13px}
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:960px){
+    :root{--sidebar-w:0px}
+    .sidebar{transform:translateX(-100%)}
+    .sidebar.open{transform:translateX(0);width:280px;box-shadow:4px 0 24px rgba(0,0,0,.08)}
+    .menu-toggle{display:block}
+    .main{margin-left:0}
+    .footer{margin-left:0}
+    .content{padding:32px 20px 80px}
+    .mode-grid{grid-template-columns:1fr}
+    .cards{grid-template-columns:1fr}
+    h1{font-size:26px}
+    h2{font-size:20px}
+  }
+
+  [id]{scroll-margin-top:calc(var(--header-h) + 20px)}
+
+  /* ===== BACK TO TOP ===== */
+  .back-top{position:fixed;bottom:28px;right:28px;width:40px;height:40px;border-radius:10px;background:var(--c-brand);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(8px);transition:all .2s ease;z-index:80;box-shadow:0 2px 12px rgba(99,102,231,.3)}
+  .back-top.visible{opacity:1;transform:translateY(0)}
+  .back-top:hover{background:var(--c-brand-light);transform:translateY(-2px)}
+
+  /* ===== STEP LIST ===== */
+  .steps{counter-reset:step;list-style:none;padding-left:0;margin-bottom:20px}
+  .steps li{counter-increment:step;position:relative;padding-left:40px;margin-bottom:18px}
+  .steps li::before{content:counter(step);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--c-brand);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+  /* ===== SCENARIO CARDS ===== */
+  .scenario{border:1px solid var(--c-border);border-radius:12px;padding:24px;margin-bottom:20px;background:var(--c-bg)}
+  .scenario-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .scenario-num{width:28px;height:28px;border-radius:50%;background:var(--c-brand);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .scenario-title{font-size:16px;font-weight:700;color:var(--c-text)}
+  .scenario p{font-size:14px;margin-bottom:12px}
+  .scenario pre{margin-bottom:12px}
+  .scenario .why{font-size:13.5px;color:var(--c-text-2);font-style:italic;margin:0}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle menu">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+  </button>
+  <div class="header-logo">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="3" width="20" height="18" rx="3" fill="#6366f1"/><path d="M7 8l5 4-5 4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 16h4" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    Claude Code /loop 命令完全指南
+  </div>
+  <span class="header-badge">v2026.06</span>
+</header>
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar" id="sidebar">
+  <div class="nav-group">
+    <div class="nav-group-title">入门</div>
+    <a class="nav-link" href="#what-is-loop">什么是 /loop</a>
+    <a class="nav-link" href="#syntax">基本语法</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">运行模式</div>
+    <a class="nav-link" href="#modes">两种运行模式</a>
+    <a class="nav-link sub" href="#mode-fixed">固定间隔模式</a>
+    <a class="nav-link sub" href="#mode-dynamic">动态自适应模式</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">深入</div>
+    <a class="nav-link" href="#mechanism">核心机制</a>
+    <a class="nav-link sub" href="#cron-create">CronCreate</a>
+    <a class="nav-link sub" href="#schedule-wakeup">ScheduleWakeup</a>
+    <a class="nav-link" href="#scenarios">典型使用场景</a>
+    <a class="nav-link sub" href="#scene-deploy">轮询部署状态</a>
+    <a class="nav-link sub" href="#scene-babysit">看护长任务</a>
+    <a class="nav-link sub" href="#scene-review">周期性代码审查</a>
+    <a class="nav-link sub" href="#scene-log">监控日志与告警</a>
+    <a class="nav-link sub" href="#scene-cmd">重复执行命令</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">对比与实践</div>
+    <a class="nav-link" href="#comparison">与系统 Cron 对比</a>
+    <a class="nav-link" href="#limits">限制与注意事项</a>
+    <a class="nav-link" href="#best-practices">最佳实践</a>
+    <a class="nav-link" href="#faq">常见问题 FAQ</a>
+    <a class="nav-link" href="#cheat-sheet">速查表</a>
+  </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main">
+<div class="content">
+
+<!-- ===== INTRO ===== -->
+<h1 id="what-is-loop">Claude Code /loop 命令完全指南</h1>
+<p class="lead">从零开始，系统掌握 Claude Code 的 <code>/loop</code> 命令。本文涵盖语法、两种运行模式、底层机制、五大典型场景、与系统 Cron 的对比、限制与最佳实践。即使你从未使用过 <code>/loop</code>，也能轻松上手。</p>
+
+<div class="callout info">
+  <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+  <div><strong>一句话总结：</strong><code>/loop</code> 是 Claude Code 的"值班闹钟"——让 Claude 按固定间隔或自适应节奏，反复执行 prompt 或 slash 命令，适合需要 AI 智能参与的周期性监控与轮询任务。</div>
+</div>
+
+<h2>什么是 /loop</h2>
+<p><code>/loop</code> 是 Claude Code 内置的一个 <strong>skill（技能/斜杠命令）</strong>，它允许你设定一个 prompt 或 slash 命令，让 Claude Code <strong>按指定的时间间隔反复执行</strong>。</p>
+<p>与系统级的 cron 不同，<code>/loop</code> 的每次迭代都会让 Claude <strong>完整思考和分析</strong>，而不仅仅是机械地执行命令。这意味着 Claude 可以：</p>
+<ul>
+  <li><strong>解读命令输出</strong>，判断是否正常</li>
+  <li><strong>根据当前状态</strong>决定下一步操作</li>
+  <li><strong>汇报有意义的摘要</strong>，而非原始日志</li>
+  <li><strong>在满足条件时</strong>自动停止</li>
+</ul>
+
+<div class="diagram">
+  <div class="diagram-title">/loop 工作流程</div>
+  <div class="flow-row">
+    <div class="flow-box flow-user">用户设定<br><code>/loop 5m 检查部署</code></div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-box flow-claude">Claude 注册<br>定时任务</div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-box flow-tool">每 5 分钟<br>触发执行</div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-box flow-result">Claude 分析<br>并向你汇报</div>
+  </div>
+  <div class="flow-row">
+    <div class="flow-box flow-result" style="background:#fef2f2;border-color:#fecaca;color:#991b1b">条件满足 &#8594; 停止</div>
+    <span class="flow-arrow" style="transform:rotate(180deg)">&#8592;</span>
+    <div class="flow-box flow-claude" style="background:#fef3c7;border-color:#fde68a;color:#92400e">Claude 判断<br>是否应停止</div>
+  </div>
+</div>
+
+<div class="callout tip">
+  <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  <div><strong>核心价值：</strong>把 Claude 变成一个"有智慧的值班员"，而不只是一个定时器。</div>
+</div>
+
+
+<!-- ===== SECTION 2: 基本语法 ===== -->
+<h2 id="syntax">基本语法</h2>
+<pre><span class="code-label">语法</span><code>/loop <span class="code-key">&lt;间隔&gt;</span> <span class="code-str">&lt;prompt 或 slash 命令&gt;</span></code></pre>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>参数</th><th>说明</th><th>示例</th></tr></thead>
+  <tbody>
+    <tr><td><code>&lt;间隔&gt;</code></td><td>执行间隔，支持 <code>s</code>（秒）、<code>m</code>（分）、<code>h</code>（时）</td><td><code>5m</code>、<code>30s</code>、<code>1h</code></td></tr>
+    <tr><td><code>&lt;prompt&gt;</code></td><td>要让 Claude 反复执行的提示词或命令</td><td><code>"检查部署状态"</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h4>示例</h4>
+<pre><code><span class="code-comment"># 每 5 分钟检查部署状态</span>
+/loop <span class="code-num">5m</span> <span class="code-str">检查 CI/CD 部署状态，如果完成告诉我结果</span>
+
+<span class="code-comment"># 每 10 分钟执行代码审查</span>
+/loop <span class="code-num">10m</span> <span class="code-str">/code-review</span>
+
+<span class="code-comment"># 每 30 秒运行测试并自动修复</span>
+/loop <span class="code-num">30s</span> <span class="code-str">运行 python test.py，如果失败就修复并重试</span></code></pre>
+
+<div class="callout info">
+  <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+  <div><strong>注意：</strong>如果不指定间隔，在动态自适应模式下由 Claude 自行决定合适的检查频率。</div>
+</div>
+
+
+<!-- ===== SECTION 3: 两种运行模式 ===== -->
+<h2 id="modes">两种运行模式</h2>
+
+<div class="mode-grid">
+  <div class="mode-card mode-fixed">
+    <span class="mode-badge">固定间隔模式</span>
+    <h4>用户显式指定间隔</h4>
+    <p>Claude 每隔固定时间执行一次 prompt。</p>
+    <ul>
+      <li>间隔固定，行为可预测</li>
+      <li>适合已知合理轮询频率的场景</li>
+      <li>每次执行都消耗 token</li>
+    </ul>
+  </div>
+  <div class="mode-card mode-dynamic">
+    <span class="mode-badge">动态自适应模式</span>
+    <h4>Claude 自主决定节奏</h4>
+    <p>Claude 根据任务性质自行调整检查频率。</p>
+    <ul>
+      <li>无需手动指定间隔</li>
+      <li>任务活跃时频繁，空闲时降频</li>
+      <li>更省 token，更智能</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="mode-fixed">固定间隔模式</h3>
+<pre><code><span class="code-comment"># 每 5 分钟检查一次</span>
+/loop <span class="code-num">5m</span> <span class="code-str">检查服务器健康状态</span></code></pre>
+<p>底层使用 <code>CronCreate</code> 注册一个标准 cron 表达式，按固定时间触发。</p>
+
+<h3 id="mode-dynamic">动态自适应模式（Dynamic Pacing）</h3>
+<p>当你说"帮我持续盯着这个任务"而不指定具体间隔时，Claude 进入动态自适应模式，通过 <code>ScheduleWakeup</code> 自行决定何时唤醒。</p>
+
+<div class="diagram">
+  <div class="diagram-title">动态自适应节奏示意</div>
+  <div style="display:flex;align-items:end;gap:6px;justify-content:center;height:120px;padding:0 20px">
+    <div style="width:20px;background:#6366f1;border-radius:4px 4px 0 0;height:80%" title="任务启动：频繁检查"></div>
+    <div style="width:20px;background:#6366f1;border-radius:4px 4px 0 0;height:70%" title=""></div>
+    <div style="width:20px;background:#6366f1;border-radius:4px 4px 0 0;height:60%" title=""></div>
+    <div style="width:20px;background:#818cf8;border-radius:4px 4px 0 0;height:40%" title="进入等待：降频"></div>
+    <div style="width:20px;background:#818cf8;border-radius:4px 4px 0 0;height:25%" title=""></div>
+    <div style="width:20px;background:#818cf8;border-radius:4px 4px 0 0;height:20%" title=""></div>
+    <div style="width:20px;background:#818cf8;border-radius:4px 4px 0 0;height:18%" title="稳定等待：最低频率"></div>
+    <div style="width:20px;background:#818cf8;border-radius:4px 4px 0 0;height:15%" title=""></div>
+    <div style="width:20px;background:#f59e0b;border-radius:4px 4px 0 0;height:65%" title="检测到异常：恢复高频"></div>
+    <div style="width:20px;background:#f59e0b;border-radius:4px 4px 0 0;height:80%" title=""></div>
+    <div style="width:20px;background:#10b981;border-radius:4px 4px 0 0;height:90%" title="任务完成：停止"></div>
+  </div>
+  <div style="display:flex;justify-content:center;gap:24px;margin-top:12px;font-size:12px;color:var(--c-text-3)">
+    <span><span style="display:inline-block;width:10px;height:10px;background:#6366f1;border-radius:2px;margin-right:4px;vertical-align:middle"></span>启动期</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#818cf8;border-radius:2px;margin-right:4px;vertical-align:middle"></span>等待期</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;margin-right:4px;vertical-align:middle"></span>异常</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#10b981;border-radius:2px;margin-right:4px;vertical-align:middle"></span>完成</span>
+  </div>
+</div>
+
+
+<!-- ===== SECTION 4: 核心机制 ===== -->
+<h2 id="mechanism">核心机制</h2>
+<p><code>/loop</code> 底层依赖两个关键工具：</p>
+
+<h3 id="cron-create">CronCreate — 定时调度</h3>
+<pre><span class="code-label">API</span><code><span class="code-bracket">CronCreate({</span>
+  <span class="code-key">cron</span>: <span class="code-str">"*/5 * * * *"</span>,       <span class="code-comment">// 标准 5 字段 cron 表达式</span>
+  <span class="code-key">prompt</span>: <span class="code-str">"检查部署状态"</span>,     <span class="code-comment">// 每次触发时执行的 prompt</span>
+  <span class="code-key">recurring</span>: <span class="code-num">true</span>,           <span class="code-comment">// true = 循环执行</span>
+  <span class="code-key">durable</span>: <span class="code-num">false</span>             <span class="code-comment">// true = 持久化到磁盘</span>
+<span class="code-bracket">})</span></code></pre>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-icon">&#128339;</div>
+    <h4>会话级（默认）</h4>
+    <p><code>durable: false</code> — 仅在当前 Claude Code 会话有效，关闭即消失。</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">&#128190;</div>
+    <h4>持久化</h4>
+    <p><code>durable: true</code> — 写入 <code>.claude/scheduled_tasks.json</code>，重启后恢复。</p>
+  </div>
+</div>
+
+<div class="callout warn">
+  <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg>
+  <div><strong>7 天自动过期：</strong>循环任务（<code>recurring: true</code>）最长自动存活 <strong>7 天</strong>。到期后最后一次触发，然后自动删除。这是安全机制，防止遗忘的任务无限消耗 token。</div>
+</div>
+
+<h3 id="schedule-wakeup">ScheduleWakeup — 动态唤醒</h3>
+<p>用于动态自适应模式，Claude 自行决定何时唤醒自己：</p>
+<pre><code><span class="code-bracket">ScheduleWakeup({</span>
+  <span class="code-key">delaySeconds</span>: <span class="code-num">270</span>,           <span class="code-comment">// 多少秒后唤醒</span>
+  <span class="code-key">prompt</span>: <span class="code-str">"继续检查部署状态"</span>,   <span class="code-comment">// 唤醒时执行的 prompt</span>
+  <span class="code-key">reason</span>: <span class="code-str">"等待 CI 构建完成"</span>   <span class="code-comment">// 告知用户为什么选这个间隔</span>
+<span class="code-bracket">})</span></code></pre>
+
+<div class="callout tip">
+  <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  <div><strong>缓存优化策略：</strong>Anthropic 的 prompt cache 有 5 分钟 TTL。间隔 &lt; 5 分钟（60s–270s）可命中缓存，省 token。Claude 会自动选择最优间隔，避免无意义的 cache miss。</div>
+</div>
+
+
+<!-- ===== SECTION 5: 典型使用场景 ===== -->
+<h2 id="scenarios">典型使用场景与案例</h2>
+
+<div class="scenario" id="scene-deploy">
+  <div class="scenario-header">
+    <div class="scenario-num">1</div>
+    <div class="scenario-title">轮询部署状态</div>
+  </div>
+  <p><strong>场景：</strong>你刚触发了一个部署，需要持续监控直到完成。</p>
+  <pre><code>/loop <span class="code-num">5m</span> <span class="code-str">检查 CI/CD 部署状态。运行 `gh run list --limit 1` 查看最新</span>
+<span class="code-str">workflow run 的状态。如果 success 告诉我"部署成功"并停止。</span>
+<span class="code-str">如果 failure 告诉我失败原因。还在进行中则简要告知进度。</span></code></pre>
+  <p class="why">为什么用 /loop 而不是 bash while 循环？Claude 每次会<strong>解读</strong>输出，判断是否成功，而不是让你自己看原始日志。</p>
+</div>
+
+<div class="scenario" id="scene-babysit">
+  <div class="scenario-header">
+    <div class="scenario-num">2</div>
+    <div class="scenario-title">看护长时间运行的任务</div>
+  </div>
+  <p><strong>场景：</strong>后台有训练任务或数据处理任务，你需要知道它是否正常。</p>
+  <pre><code>/loop <span class="code-num">15m</span> <span class="code-str">检查后台训练任务的状态：</span>
+<span class="code-str">1. 运行 `ps aux | grep train.py` 确认进程是否存活</span>
+<span class="code-str">2. 检查 `tail -20 training.log` 看最近的日志</span>
+<span class="code-str">3. 如果有 ERROR 或异常，立即告诉我</span>
+<span class="code-str">4. 如果一切正常，简要汇报当前进度</span></code></pre>
+</div>
+
+<div class="scenario" id="scene-review">
+  <div class="scenario-header">
+    <div class="scenario-num">3</div>
+    <div class="scenario-title">周期性代码审查</div>
+  </div>
+  <p><strong>场景：</strong>团队成员在持续提交代码，你想定期获取审查摘要。</p>
+  <pre><code>/loop <span class="code-num">30m</span> <span class="code-str">运行 /code-review，总结最近 30 分钟内的代码变更，</span>
+<span class="code-str">重点关注潜在 bug 和安全问题。</span></code></pre>
+</div>
+
+<div class="scenario" id="scene-log">
+  <div class="scenario-header">
+    <div class="scenario-num">4</div>
+    <div class="scenario-title">监控日志与告警</div>
+  </div>
+  <p><strong>场景：</strong>监控应用日志，发现异常及时告警。</p>
+  <pre><code>/loop <span class="code-num">2m</span> <span class="code-str">检查 /var/log/app/error.log 的最新内容。</span>
+<span class="code-str">如果发现新的错误条目：</span>
+<span class="code-str">- 分析错误原因</span>
+<span class="code-str">- 评估严重程度（低/中/高）</span>
+<span class="code-str">- 给出修复建议</span>
+<span class="code-str">如果没有新错误，回复"无异常"即可。</span></code></pre>
+</div>
+
+<div class="scenario" id="scene-cmd">
+  <div class="scenario-header">
+    <div class="scenario-num">5</div>
+    <div class="scenario-title">重复执行 slash 命令</div>
+  </div>
+  <p><strong>场景：</strong>让某个 slash 命令定期运行。</p>
+  <pre><code>/loop <span class="code-num">1h</span> <span class="code-str">/verify</span>          <span class="code-comment"># 每小时验证应用状态</span>
+/loop <span class="code-num">30m</span> <span class="code-str">/code-review</span>    <span class="code-comment"># 每半小时审查代码</span>
+/loop <span class="code-num">15m</span> <span class="code-str">/run</span>            <span class="code-comment"># 每 15 分钟运行并检查应用</span></code></pre>
+</div>
+
+
+<!-- ===== SECTION 6: 与系统 Cron 对比 ===== -->
+<h2 id="comparison">与系统 Cron / Task Scheduler 的对比</h2>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>特性</th><th><code>/loop</code></th><th>系统 Cron / Task Scheduler</th></tr></thead>
+  <tbody>
+    <tr><td><strong>执行方式</strong></td><td>Claude 思考后执行</td><td>直接执行命令</td></tr>
+    <tr><td><strong>智能分析</strong></td><td style="color:var(--c-green)">&#10003; 每次迭代都有 AI 分析</td><td style="color:var(--c-red)">&#10007; 纯机械执行</td></tr>
+    <tr><td><strong>Token 消耗</strong></td><td>每次消耗 token</td><td>免费</td></tr>
+    <tr><td><strong>依赖会话</strong></td><td>Claude Code 关闭则停止</td><td>系统级，独立运行</td></tr>
+    <tr><td><strong>输出解读</strong></td><td style="color:var(--c-green)">&#10003; 自动解读并汇报</td><td style="color:var(--c-red)">&#10007; 需要自己看日志</td></tr>
+    <tr><td><strong>条件判断</strong></td><td style="color:var(--c-green)">&#10003; Claude 自主判断</td><td style="color:var(--c-red)">&#10007; 需手动编写脚本逻辑</td></tr>
+    <tr><td><strong>最短间隔</strong></td><td>约 1 分钟</td><td>1 分钟（cron 标准）</td></tr>
+    <tr><td><strong>持久化</strong></td><td>可选（durable: true）</td><td>天然持久化</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="cards">
+  <div class="card" style="border-color:#bbf7d0;background:var(--c-green-bg)">
+    <div class="card-icon">&#129302;</div>
+    <h4>选 /loop</h4>
+    <p>需要 Claude <strong>理解、判断、汇报</strong>的场景。如监控部署、看护任务、分析日志。</p>
+  </div>
+  <div class="card" style="border-color:#bfdbfe;background:var(--c-blue-bg)">
+    <div class="card-icon">&#9881;&#65039;</div>
+    <h4>选系统 Cron</h4>
+    <p>只是<strong>机械执行、记录日志</strong>的场景。如定时备份、清理临时文件。</p>
+  </div>
+</div>
+
+
+<!-- ===== SECTION 7: 限制与注意事项 ===== -->
+<h2 id="limits">限制与注意事项</h2>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-icon">&#128176;</div>
+    <h4>Token 消耗</h4>
+    <p>每次触发都调用 Claude。间隔 1 分钟 = 一天 1440 次。请根据实际需要设置合理间隔。</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">&#128268;</div>
+    <h4>会话依赖</h4>
+    <p>默认非持久模式下，关闭 Claude Code 会话后定时任务消失。</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">&#9200;</div>
+    <h4>7 天自动过期</h4>
+    <p>循环任务最长存活 7 天，到期后最后一次触发并自动删除。需要更长的周期可重新设置。</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">&#128220;</div>
+    <h4>非实时</h4>
+    <p>精度为分钟级，不适合秒级高频轮询。秒级监控应使用专业工具。</p>
+  </div>
+</div>
+
+<div class="callout danger">
+  <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+  <div><strong>不替代专业工具：</strong><code>/loop</code> 是轻量级智能轮询工具，不能替代 Prometheus/Grafana（监控）、Jenkins/GitHub Actions（CI/CD）、PagerDuty（告警）等专业系统。</div>
+</div>
+
+
+<!-- ===== SECTION 8: 最佳实践 ===== -->
+<h2 id="best-practices">最佳实践</h2>
+
+<h3>8.1 明确退出条件</h3>
+<p>每次使用 <code>/loop</code> 时，告诉 Claude 什么时候应该停止：</p>
+<pre><code>/loop <span class="code-num">5m</span> <span class="code-str">检查部署状态。如果成功或失败（非进行中），告诉我结果后停止。</span>
+<span class="code-str">如果超过 30 分钟仍未完成，也停止并报告超时。</span></code></pre>
+
+<h3>8.2 合理设置间隔</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>任务类型</th><th>建议间隔</th><th>原因</th></tr></thead>
+  <tbody>
+    <tr><td>CI/CD 部署监控</td><td>3–5 分钟</td><td>部署通常 5–15 分钟</td></tr>
+    <tr><td>后台任务看护</td><td>10–15 分钟</td><td>训练任务周期较长</td></tr>
+    <tr><td>日志监控</td><td>2–5 分钟</td><td>需要较快发现异常</td></tr>
+    <tr><td>PR 审查</td><td>30 分钟–1 小时</td><td>代码变更不会太频繁</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>8.3 利用 cache 优化成本</h3>
+<div class="callout tip">
+  <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  <div><strong>技巧：</strong>Claude 的 prompt cache 有 5 分钟 TTL。将间隔设置为 ≤5 分钟（如 1m、2.5m、5m）可命中缓存，成本显著降低。间隔 &gt;5 分钟则每次都是全新推理。</div>
+</div>
+
+<h3>8.4 结合其他 slash 命令</h3>
+<p><code>/loop</code> 可以嵌套调用其他 slash 命令，形成自动化流水线：</p>
+<pre><code>/loop <span class="code-num">1h</span> <span class="code-str">/verify</span>          <span class="code-comment"># 每小时验证应用状态</span>
+/loop <span class="code-num">30m</span> <span class="code-str">/code-review</span>    <span class="code-comment"># 每半小时审查代码</span>
+/loop <span class="code-num">15m</span> <span class="code-str">/run</span>            <span class="code-comment"># 每 15 分钟运行并检查</span></code></pre>
+
+
+<!-- ===== SECTION 9: FAQ ===== -->
+<h2 id="faq">常见问题 FAQ</h2>
+
+<h4>Q: /loop 是官方内置命令吗？</h4>
+<p>是的，<code>/loop</code> 是 Claude Code 内置的 skill（技能），通过斜杠命令调用。</p>
+
+<h4>Q: 如何停止一个正在运行的 /loop？</h4>
+<p>在 Claude Code 会话中直接告诉 Claude "停止 loop"，或者关闭当前会话。也可以输入 <code>cronlist</code> 查看所有定时任务，然后用 <code>CronDelete</code> 删除指定任务。</p>
+
+<h4>Q: /loop 会消耗多少 token？</h4>
+<p>取决于间隔和 prompt 复杂度。每次触发都相当于一次完整的 Claude 对话。建议根据实际需要设置合理间隔。</p>
+
+<h4>Q: 可以同时运行多个 /loop 吗？</h4>
+<p>可以。每个 <code>/loop</code> 是独立的定时任务，互不干扰。</p>
+
+<h4>Q: /loop 和 CronCreate 什么关系？</h4>
+<p><code>/loop</code> 是用户面向的命令，底层使用 <code>CronCreate</code> 工具注册定时任务。你也可以直接使用 <code>CronCreate</code> 获得更精细的控制（如指定 cron 表达式、设置持久化等）。</p>
+
+<h4>Q: 重启 Claude Code 后 /loop 还在吗？</h4>
+<p>取决于是否设置了持久化（<code>durable: true</code>）。默认情况下（非持久化），关闭会话后任务消失。</p>
+
+<h4>Q: 可以用 /loop 执行 Python 脚本吗？</h4>
+<p>可以，但不是最优选择。如果只需定时执行脚本（不需要 AI 分析），使用 Windows Task Scheduler 或系统 cron 更省资源。<code>/loop</code> 适合需要 Claude <strong>解读脚本输出</strong>的场景。</p>
+
+<h4>Q: 7 天自动过期是什么意思？</h4>
+<p>循环任务最长存活 7 天。这是安全机制，防止遗忘的任务无限消耗 token。到期前最后一次触发后自动删除。需要更长周期，7 天后重新设置即可。</p>
+
+
+<!-- ===== SECTION 10: 速查表 ===== -->
+<h2 id="cheat-sheet">速查表</h2>
+
+<h3>语法速查</h3>
+<pre><code>/loop <span class="code-key">&lt;间隔&gt;</span> <span class="code-str">&lt;prompt&gt;</span>          <span class="code-comment"># 固定间隔模式</span>
+/loop <span class="code-str">持续监控 &lt;任务&gt;</span>           <span class="code-comment"># 动态自适应模式</span></code></pre>
+
+<h3>间隔格式</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>格式</th><th>含义</th></tr></thead>
+  <tbody>
+    <tr><td><code>30s</code></td><td>30 秒</td></tr>
+    <tr><td><code>5m</code></td><td>5 分钟</td></tr>
+    <tr><td><code>1h</code></td><td>1 小时</td></tr>
+    <tr><td>不指定</td><td>由 Claude 动态决定</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>常用场景模板</h3>
+<pre><code><span class="code-comment"># 监控部署</span>
+/loop <span class="code-num">5m</span> <span class="code-str">检查部署状态，完成后告诉我结果</span>
+
+<span class="code-comment"># 看护任务</span>
+/loop <span class="code-num">15m</span> <span class="code-str">检查后台任务是否正常，有异常立即报告</span>
+
+<span class="code-comment"># 代码审查</span>
+/loop <span class="code-num">30m</span> <span class="code-str">/code-review</span>
+
+<span class="code-comment"># 日志监控</span>
+/loop <span class="code-num">2m</span> <span class="code-str">检查错误日志，有新错误时分析并报告</span>
+
+<span class="code-comment"># 验证应用</span>
+/loop <span class="code-num">1h</span> <span class="code-str">/verify</span></code></pre>
+
+<h3>管理命令</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>操作</th><th>方式</th></tr></thead>
+  <tbody>
+    <tr><td>查看所有定时任务</td><td>输入 <code>cronlist</code> 或让 Claude 列出</td></tr>
+    <tr><td>停止某个任务</td><td>告诉 Claude 任务 ID，让它用 <code>CronDelete</code> 删除</td></tr>
+    <tr><td>停止所有任务</td><td>关闭 Claude Code 会话</td></tr>
+  </tbody>
+</table>
+</div>
+
+</div><!-- /content -->
+</main>
+
+<footer class="footer">
+  Claude Code /loop 命令完全指南 &middot; 2026.06 &middot; 内容基于 Claude Code 内置 skill 文档和工具定义整理
+</footer>
+
+<!-- BACK TO TOP -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="回到顶部">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+</button>
+
+<script>
+const links = document.querySelectorAll('.nav-link');
+const sections = [];
+links.forEach(l => {
+  const id = l.getAttribute('href')?.replace('#','');
+  if (id) { const el = document.getElementById(id); if (el) sections.push({el, link: l}); }
+});
+function updateActive() {
+  const y = window.scrollY + 100;
+  let current = sections[0];
+  for (const s of sections) { if (s.el.offsetTop <= y) current = s; }
+  links.forEach(l => l.classList.remove('active'));
+  if (current) current.link.classList.add('active');
+}
+const btn = document.getElementById('backTop');
+function updateBtn() { btn.classList.toggle('visible', window.scrollY > 400); }
+window.addEventListener('scroll', () => { updateActive(); updateBtn(); }, {passive:true});
+updateActive();
+links.forEach(l => l.addEventListener('click', () => {
+  if (window.innerWidth <= 960) document.querySelector('.sidebar').classList.remove('open');
+}));
+</script>
+</body>
+</html>
