@@ -277,7 +277,7 @@
 <table>
   <thead><tr><th>参数</th><th>说明</th><th>示例</th></tr></thead>
   <tbody>
-    <tr><td><code>&lt;间隔&gt;</code></td><td>执行间隔，支持 <code>s</code>（秒）、<code>m</code>（分）、<code>h</code>（时）</td><td><code>5m</code>、<code>30s</code>、<code>1h</code></td></tr>
+    <tr><td><code>&lt;间隔&gt;</code></td><td>执行间隔，支持 <code>m</code>（分钟）、<code>h</code>（小时）</td><td><code>5m</code>、<code>1m</code>、<code>1h</code></td></tr>
     <tr><td><code>&lt;prompt&gt;</code></td><td>要让 Claude 反复执行的提示词或命令</td><td><code>"检查部署状态"</code></td></tr>
   </tbody>
 </table>
@@ -291,7 +291,7 @@
 /loop <span class="code-num">10m</span> <span class="code-str">/code-review</span>
 
 <span class="code-comment"># 每 30 秒运行测试并自动修复</span>
-/loop <span class="code-num">30s</span> <span class="code-str">运行 python test.py，如果失败就修复并重试</span></code></pre>
+/loop <span class="code-num">1m</span> <span class="code-str">运行 python test.py，如果失败就修复并重试</span></code></pre>
 
 <div class="callout info">
   <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -397,7 +397,7 @@
 
 <div class="callout tip">
   <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-  <div><strong>缓存优化策略：</strong>Anthropic 的 prompt cache 有 5 分钟 TTL。间隔 &lt; 5 分钟（60s–270s）可命中缓存，省 token。Claude 会自动选择最优间隔，避免无意义的 cache miss。</div>
+  <div><strong>缓存优化策略：</strong>Anthropic 的 prompt cache 有 5 分钟 TTL。间隔 ≤ 5 分钟（1m–5m）可命中缓存，省 token。Claude 会自动选择最优间隔，避免无意义的 cache miss。</div>
 </div>
 
 
@@ -478,7 +478,7 @@
     <tr><td><strong>依赖会话</strong></td><td>Claude Code 关闭则停止</td><td>系统级，独立运行</td></tr>
     <tr><td><strong>输出解读</strong></td><td style="color:var(--c-green)">&#10003; 自动解读并汇报</td><td style="color:var(--c-red)">&#10007; 需要自己看日志</td></tr>
     <tr><td><strong>条件判断</strong></td><td style="color:var(--c-green)">&#10003; Claude 自主判断</td><td style="color:var(--c-red)">&#10007; 需手动编写脚本逻辑</td></tr>
-    <tr><td><strong>最短间隔</strong></td><td>约 1 分钟</td><td>1 分钟（cron 标准）</td></tr>
+    <tr><td><strong>最短间隔</strong></td><td>1 分钟</td><td>1 分钟（cron 标准）</td></tr>
     <tr><td><strong>持久化</strong></td><td>可选（durable: true）</td><td>天然持久化</td></tr>
   </tbody>
 </table>
@@ -604,7 +604,7 @@
 <table>
   <thead><tr><th>格式</th><th>含义</th></tr></thead>
   <tbody>
-    <tr><td><code>30s</code></td><td>30 秒</td></tr>
+    <tr><td><code>1m</code></td><td>30 秒</td></tr>
     <tr><td><code>5m</code></td><td>5 分钟</td></tr>
     <tr><td><code>1h</code></td><td>1 小时</td></tr>
     <tr><td>不指定</td><td>由 Claude 动态决定</td></tr>
