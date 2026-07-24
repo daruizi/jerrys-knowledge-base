@@ -24,10 +24,12 @@ graph TD
         AI --> M4[Markdown 进阶]
         AI --> M5[OpenClaw 平台]
         AI --> M6[Gemini CLI]
+        AI --> M7[Codex]
     end
     
     style AI fill:#f9f,stroke:#333,stroke-width:2px
     style ROOT fill:#bbf,stroke:#333,stroke-width:2px
+    style M7 fill:#9f9,stroke:#333,stroke-width:2px
 ```
 *注：标注 `*` 的目录目前正在筹备中。*
 
@@ -45,6 +47,7 @@ graph TD
 | **GitHub 入门到精通** | 零基础扫盲！用单机游戏存档的逻辑，摧毁对 Git 命令的恐惧 | [查看](./ai-coding/新手必学-GitHub-与版本控制完全指南.md) |
 | **MCP Server 开发实战** | 手把手 TypeScript 编写本地读写插件 | [查看](./ai-coding/实战篇-开发我的第一个-MCP-Server.md) |
 | **Claude Code 保姆指南** | 国内模型代理、新手排错、安装指引 | [查看](./ai-coding/实战篇-Claude-Code-保姆级安装与使用指南.md) |
+| **Codex 从入门到精通** | 桌面App + CLI + 云端全形态、阿里云百炼国产模型配置、Windows 踩坑实录 | [查看](./ai-coding/Codex-从入门到精通.md) · [网页版](./ai-coding/Codex-从入门到精通.html) |
 | **Claude Code 速查手册** | CLI参数、斜杠命令、高级快捷键全指南 | [查看](./ai-coding/Claude-Code-命令与快捷键速查手册.md) |
 | **MCP 协议完全通关** | TypeScript/Python 开发、多模型连接 | [查看](./ai-coding/Claude-Code-MCP-从入门到精通.md) |
 | **Skills 高级进阶** | 自动化拦截 (Hooks)、子代理 (Fork) | [查看](./ai-coding/Claude-Code-Skills-从入门到精通.md) |
@@ -83,6 +86,7 @@ graph TD
 
 ## 📝 最近动态
 
+- **2026-07-24**: 新增《Codex（ChatGPT）从入门到精通》完整指南（Markdown + 单文件 HTML 网页版），覆盖产品家族、核心能力、与主流 Agent 对比、安装配置、阿里云百炼国产模型接入与 Windows 踩坑实录。
 - **2026-05-07**: 新增 `hermes-agent` 目录，完整收录 Hermes Agent 官方文档的中文学习指南（11 个章节，涵盖安装、架构、记忆、技能、工具、消息平台等全部内容）。
 - **2026-03-21**: 深度优化《Markdown 从入门到精通》全语法教程，新增 AI 提示词工程（Prompt）与大模型规范（CLAUDE.md）协同等高阶指南。
 - **2026-03-10**: 新增《Gemini CLI 保姆级安装与使用指南》，涵盖谷歌原生 AI 助手全指令、Token 监控及 `GEMINI.md` 规范。
@@ -92,5 +96,5 @@ graph TD
 
 ---
 
-> 📅 最后更新：2026-05-07  
+> 📅 最后更新：2026-07-24  
 > 📚 GitHub Repo: [jerrys-knowledge-base](https://github.com/daruizi/jerrys-knowledge-base)
