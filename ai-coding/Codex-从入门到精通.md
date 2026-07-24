@@ -17,6 +17,8 @@
 - [四、安装：十分钟搞定](#四安装十分钟搞定)
 - [五、快速上手：第一次对话](#五快速上手第一次对话)
 - [六、配置精通：从 config.toml 到自定义模型](#六配置精通从-configtoml-到自定义模型)
+   - [6.8 配置文件的种类与六层优先级](#s6-priority)
+   - [6.9 多供应商接入与三种组织方式](#s6-multi)
 - [七、进阶实战：多 Agent、自动化与工程化](#七进阶实战多-agent自动化与工程化)
 - [八、Windows 踩坑实录（血泪经验）](#八windows-踩坑实录血泪经验)
 - [九、常见问题 FAQ](#九常见问题-faq)
@@ -572,6 +574,196 @@ enabled = true
 ```
 
 桌面应用里可以在插件面板图形化管理。官方市集 `openai-primary-runtime` 提供文档、表格、PDF、演示文稿、模板创建等一手插件。
+
+<a id="s6-priority"></a>
+
+### 6.8 配置文件的种类与六层优先级
+
+很多人把 `config.toml` 和 `AGENTS.md` 混为一谈，但它们管的事完全不同。先分清"配置"其实是**两大体系 + 两个覆盖来源**：
+
+| 类别 | 是什么 | 管什么 | 合并方式 |
+|:---|:---|:---|:---|
+| **运行配置 `config.toml`** | TOML 参数文件 | "它**怎么跑**"：模型、沙箱、审批、提供商、MCP、profile、遥测 | **覆盖**（高优先级键盖过低优先级同名键） |
+| **指令文件 `AGENTS.md`** | Markdown 规范 | "它**听什么话**"：项目环境、团队规范、已知坑 | **拼接**（沿途全部加载，越具体越后注入） |
+| **环境变量** | `OPENAI_API_KEY`、`CODEX_HOME`、`HTTPS_PROXY`… | 主要管**密钥 / 路径 / 代理** | 由 `env_key` 等机制读取 |
+| **CLI flag** | `--model`、`--sandbox`、`-c key=value`… | 一次性临时覆盖 | 最高优先级 |
+
+#### config.toml 的三种位置
+
+| 层级 | 路径 | 说明 |
+|:---|:---|:---|
+| 系统级 | `/etc/codex/config.toml`（Unix） | 整机默认；**Windows 通常没有这一层** |
+| 用户级 | `$CODEX_HOME/config.toml`，默认 `~/.codex/config.toml` | 你的全局默认；同目录还有 `auth.json`、`history.jsonl` |
+| 项目级 | 仓库内 `.codex/config.toml` | 从项目根遍历到 cwd，沿途每层都加载；**仅"已信任"项目生效** |
+
+> 文件**内部**还能用 `[profiles.<name>]` 定义命名配置集，用 `--profile` 切换、或顶层 `profile = "xxx"` 设默认。profile 是"配置集"，不是独立的文件位置。
+
+#### 跨配置源的六层优先级（高 → 低）
+
+```mermaid
+graph TB
+    A["1. CLI flag 与 -c / --config 即席覆盖  ★最高"] --> B["2. --profile 选中的 profile 值"]
+    B --> C["3. 项目级 .codex/config.toml（root→cwd，离 cwd 最近者赢，仅信任项目）"]
+    C --> D["4. 用户级 ~/.codex/config.toml"]
+    D --> E["5. 系统级 /etc/codex/config.toml（若存在）"]
+    E --> F["6. 内置默认值  ★最低"]
+```
+
+| 优先级 | 来源 | 一句话 |
+|:---:|:---|:---|
+| 1 | CLI flag / `-c` / `--config` | 启动时临时盖一切 |
+| 2 | Profile 值 | `--profile <name>` 选中的配置集 |
+| 3 | 项目级 `.codex/config.toml` | root→cwd 遍历，**closest wins**，且仅信任项目 |
+| 4 | 用户级 `~/.codex/config.toml` | 你的全局默认 |
+| 5 | 系统级 `/etc/codex/config.toml` | 整机默认（Windows 一般无） |
+| 6 | 内置默认值 | 兜底 |
+
+**官方例子**：用户级写 `model = "gpt-5.5"` → 进某仓库，项目级覆盖成 `gpt-5-pro` → 启动又加 `--model gpt-4.1` → 最终生效 `gpt-4.1`（CLI > profile > 项目 > 用户）。
+
+> 注意区分两个维度：上面是**跨文件 / 跨来源**的优先级；而在**单个 config.toml 内部**，合并顺序是 `profile 段 > 该文件顶层 base 段 > 内置默认`。两者别搞混。
+
+**实操原则**：用户级 / 系统级放"几乎所有项目通用的默认"（说话风格、通知、文件打开器）；项目级只放"这个仓库特殊"的（用哪个模型、要不要联网）；profile 用来切场景（深度审查 vs 快速干活）。
+
+#### AGENTS.md 的加载顺序（拼接，非覆盖）
+
+| 顺序 | 位置 |
+|:---:|:---|
+| ① | 全局 `~/.codex/AGENTS.md` |
+| ② | 项目根 `AGENTS.md` |
+| ③ | 子目录 `AGENTS.md`（cwd 路径上每一层，根→叶，越靠近 cwd 越后注入） |
+
+它是**全部拼接**进上下文，不丢内容；但越具体、越后注入的指令，模型通常越重视。某目录若存在 **`AGENTS.override.md`**，则进入覆盖模式，用 override 文件替代该处的常规指令发现（用于"这个目录只听这一份"的场景）。
+
+#### 落到本机的真实情况
+
+- 本机**只有用户级** `C:\Users\JINGRUI\.codex\config.toml`，没有项目级 `.codex/config.toml`——项目规范走 AGENTS.md 体系，正好符合"config.toml 管行为、AGENTS.md 管规范"的分工。
+- 想临时换模型：CLI `codex --model qwen3.7-plus "..."` 或会话内 `/model`（=第 1 层覆盖，盖过用户级写的模型）。
+- 想给某仓库单独配（比如某项目要走 OpenAI 官方而非百炼）：在该仓库建 `.codex/config.toml`，并确保 `trust_level = "trusted"`——**不信任的项目，其项目级 config 根本不被读**，这是安全设计。
+
+> **排错口诀**：改完不生效？先想"是不是被更高一层盖了"——CLI > profile > 项目 > 用户 > 系统 > 默认；项目级没生效？检查项目是否被信任。
+
+<a id="s6-multi"></a>
+
+### 6.9 多供应商接入：为什么不能"选择器直连多家"
+
+> 想把 DeepSeek / Kimi / GLM 等多家 API 同时配进 Codex、并在模型选择器里随意切换？**能"配进去"，也能"在选择器里看见"，但原生无法"点哪家就直连哪家、且都跑通"。** 想真正随意切换且各自可用，必须中间加一层网关——这不是体验优化，而是绕开 Codex 两条硬限制的唯一办法。
+
+把"配置多供应商"拆成三件独立的事，源码（`openai/codex` 的 Rust 源码，main 分支）给出的答案各不相同：
+
+| 你想做的事 | 能否做到 | 原因 |
+|:---|:---:|:---|
+| `config.toml` 里同时写多个 `[model_providers.X]` | ✅ | provider 定义是 map，多表名合并共存 |
+| 在模型目录列多家 slug，让它们**出现在 `/model` 选择器** | ✅ | 选择器列的是 catalog，列了就显示 |
+| 选了某 slug 就**直连对应厂商**且跑通 | ❌ 原生不行 | 下面两条硬限制 |
+
+#### 硬限制 ① `wire_api` 只剩 `responses`，`chat` 已删除
+
+```rust
+// codex-rs/model-provider-info/src/lib.rs
+pub enum WireApi {
+    #[default]
+    Responses,                          // 枚举里只剩这一个变体
+}
+// 反序列化时：
+//   "responses" => Ok(Responses)
+//   "chat"      => Err(CHAT_WIRE_API_REMOVED_ERROR)   // 写 chat 直接报错
+//   其它        => Err(unknown_variant)
+```
+
+注意是 **removed 不是 deprecated**——连 `ollama-chat` 也一并移除。Codex 现在对外**只会发 `POST {base_url}/responses`**。而 DeepSeek / Kimi / GLM 的"OpenAI 兼容层"普遍只实现 `/v1/chat/completions`，**没有 `/v1/responses`**。所以**直连这些厂商，连单家都跑不通**（请求打到 `/responses`，对方 404）——网关不是锦上添花，是必经之路。
+
+#### 硬限制 ② 一次会话只有一个 provider，且它不跟模型走
+
+```rust
+// codex-rs/core/src/config/mod.rs
+pub model_provider_id: String,          // 整个 Config 就一个 provider id
+let model_provider_id = model_provider              // ① CLI flag 覆盖
+    .or(cfg.model_provider)                         // ② 否则 config 顶层单值
+    .unwrap_or_else(|| "openai".to_string());       // ③ 否则 openai
+```
+
+`model_provider_id` 只来自 **CLI flag 或顶层 `model_provider`**，**没有"从模型名解析 provider"的逻辑**；模型目录条目也**没有 `provider` / `base_url` 字段**，与 provider 互不关联。后果：你在 catalog 堆三家 slug，**它们都发去同一个全局 provider 的 base_url**，`/model` 切模型**不会**切 provider。
+
+```mermaid
+flowchart LR
+    subgraph SEL["/model 选择器（catalog 列的 slug）"]
+      M1[deepseek-v4-pro]
+      M2[kimi-3]
+      M3[glm-5.2]
+    end
+    SEL -->|三个 slug 都指向| ONE["全局唯一 model_provider<br/>一个 base_url + wire_api=responses"]
+    ONE -->|POST /responses| UP[上游端点]
+    UP -->|上游是 chat-only 厂商| X["404 / 不支持 ❌"]
+    UP -->|上游是网关| OK["网关按 model 路由 + 协议转换 ✅"]
+```
+
+#### 三条落地路径
+
+**路径 1（推荐，唯一能"选择器多选 + 各自跑通"）：加一层 OpenAI 兼容网关。** 让 Codex 只看见一个 provider（网关），把"多厂商路由 + responses↔chat 转换"全交给网关——正好同时绕开两条硬限制。Codex 侧只写一个指向网关的 provider 表，catalog 列三家 slug（**slug 必须与网关路由表逐字一致**）：
+
+```toml
+# ~/.codex/config.toml
+model_provider = "gateway"
+model = "deepseek-v4-pro"
+model_catalog_json = "~/.codex/model-catalog.local.json"
+
+[model_providers.gateway]
+name = "Local Multi-Model Gateway"
+base_url = "http://127.0.0.1:8317/v1"
+env_key  = "GATEWAY_API_KEY"          # 各家真实 key 交给网关保管
+wire_api = "responses"
+```
+
+网关侧按 `model` 路由到各家上游 `/chat/completions`，并把响应包装成 responses 协议回给 Codex（new-api / one-api 等较新版本已支持 `/v1/responses` 入站与转换，**部署前务必查其最新 release notes 并实测一次**）。
+
+**路径 2：找一个"responses 协议 + 同时含这几家"的聚合平台当单一 provider。** 现实核查：阿里云百炼的 responses 只支持 Qwen；其余平台是否齐全收录这几家国产模型缺乏可靠证据，**不建议押这条路**，除非亲自验证。
+
+**路径 3：每家原生端点 + 启动 flag 切。** `codex --model-provider deepseek --model deepseek-v4-pro`。两个致命问题：① 厂商端点普遍不支持 responses，现在连启动都跑不通；② `/model` 选择器切不了 provider，换一家要重启——不等于"选择器多选随意切"。
+
+#### 用"切目录"模拟 Claude Code 的多配置
+
+在 Claude Code 里你"建多个文件夹、各放配置、cd 切换"能 work，是因为项目级 settings 改 model 即生效。Codex 有**完全对应的机制**——项目级 `.codex/config.toml` 能覆盖用户级的 `model` 与 `model_provider`（配置是分层 TOML 合并，项目级排在用户级之上）。所以"切目录 = 换一套 effective config = 真的换 provider"，机制成立。但比 Claude Code 多两道门槛：
+
+1. **信任门控 + 信任按 git 根解析**：项目级配置只对 trusted 项目生效；且"项目"边界是 **git 仓库根**。裸文件夹不会被当成独立项目 → 每个模型文件夹需各自 `git init` 并标 trusted。
+2. **协议墙不变**：切目录只解决"选中哪个 provider"，不解决"端点支不支持 responses"。每个目录的 provider `base_url` 仍须指向协议转换代理或 responses 端点。
+
+```text
+C:/Users/JINGRUI/ai-models/
+├── deepseek/   (.git + .codex/config.toml → model_provider="deepseek")
+├── kimi/       (.git + .codex/config.toml → model_provider="kimi")
+└── glm/        (.git + .codex/config.toml → model_provider="glm")
+```
+
+三家 provider 表在用户级统一定义，信任在用户级 `[projects."<绝对路径>"] trust_level = "trusted"` 标好。用法：`cd ~/ai-models/kimi && codex`。
+
+#### 三种组织方式对比
+
+| 方式 | 怎么切模型 | 多目录 | 信任 / git | 会话内能切 | 协议墙怎么过 |
+|:---|:---|:---:|:---:|:---:|:---|
+| 切目录 | `cd` 后启动 | ✅ | ✅ 都要 | ❌ | 每目录 provider 指代理 |
+| profile（最轻） | `codex --profile kimi` | ❌ 全在用户级 | ❌ | ❌ | 每 profile 指代理 |
+| 网关（最丝滑） | 会话内 `/model` | ❌ | ❌ | ✅ | 网关统一转换 + 路由 |
+
+profile 写法（无需建目录，全在用户级 config.toml）：
+
+```toml
+[profiles.kimi]
+model_provider = "kimi"
+model = "kimi-3"
+[profiles.glm]
+model_provider = "glm"
+model = "glm-5.2"
+```
+
+#### 与 Claude Code 的根本差异
+
+| | Claude Code | Codex |
+|:---|:---|:---|
+| 切目录切模型 | 项目级 settings 改 model 即生效 | 项目级 `.codex/config.toml` 改 model+provider 也生效，机制对等 |
+| 额外门槛 | 项目信任提示 | **信任按 git 根解析** → 裸文件夹需 `git init` |
+| 协议墙 | 无（不强制单一 wire 协议） | **强制 `/responses`** → 端点不支持仍 404 |
+
+> **一句话**：你在 Claude Code 里"建好目录就能用三家"，是因为没有 Codex 这条协议墙；搬到 Codex，**形式能抄，但每家端点还得先过 responses 这一关**——挂转换代理或走网关。三条路都绕不开"被选端点必须 responses 兼容"。
 
 ---
 

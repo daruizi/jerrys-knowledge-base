@@ -332,6 +332,8 @@
     <div class="nav-group">
       <div class="nav-group-title">精通篇</div>
       <a class="nav-link" href="#s6">六、配置精通</a>
+      <a class="nav-link sub" href="#s6-priority">6.8 配置层级与优先级</a>
+      <a class="nav-link sub" href="#s6-multi">6.9 多供应商接入</a>
       <a class="nav-link" href="#s7">七、进阶实战</a>
       <a class="nav-link" href="#s8">八、Windows 踩坑实录</a>
     </div>
@@ -867,6 +869,97 @@ codex mcp list
 <span class="tk-k">args</span> = [<span class="tk-s">"-y"</span>, <span class="tk-s">"@modelcontextprotocol/server-github"</span>]
 <span class="tk-k">env</span> = { GITHUB_TOKEN = <span class="tk-s">"ghp_..."</span> }</code></pre></div>
     <p class="reveal">插件把技能 + MCP + 应用打包，从市集安装后在 config.toml 或桌面应用面板里启用。官方市集 <code>openai-primary-runtime</code> 提供 documents / spreadsheets / pdf / presentations 等一手插件。</p>
+      <h3 class="reveal" id="s6-priority">配置文件的种类与六层优先级</h3>
+    <p class="reveal">很多人把 <code>config.toml</code> 和 <code>AGENTS.md</code> 混为一谈，但它们管的事完全不同。先分清"配置"其实是<strong>两大体系 + 两个覆盖来源</strong>：</p>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>类别</th><th>是什么</th><th>管什么</th><th>合并方式</th></tr></thead>
+        <tbody>
+          <tr><td><strong>运行配置 <code>config.toml</code></strong></td><td>TOML 参数文件</td><td>"它<strong>怎么跑</strong>"：模型、沙箱、审批、提供商、MCP、profile、遥测</td><td><strong>覆盖</strong>（高优先级键盖过低优先级同名键）</td></tr>
+          <tr><td><strong>指令文件 <code>AGENTS.md</code></strong></td><td>Markdown 规范</td><td>"它<strong>听什么话</strong>"：项目环境、团队规范、已知坑</td><td><strong>拼接</strong>（沿途全部加载，越具体越后注入）</td></tr>
+          <tr><td><strong>环境变量</strong></td><td><code>OPENAI_API_KEY</code>、<code>CODEX_HOME</code>…</td><td>主要管<strong>密钥 / 路径 / 代理</strong></td><td>由 <code>env_key</code> 等机制读取</td></tr>
+          <tr><td><strong>CLI flag</strong></td><td><code>--model</code>、<code>-c key=value</code>…</td><td>一次性临时覆盖</td><td>最高优先级</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="reveal"><strong>config.toml 的三种位置</strong>：系统级 <code>/etc/codex/config.toml</code>（Unix，Windows 通常没有）；用户级 <code>$CODEX_HOME/config.toml</code>（默认 <code>~/.codex/config.toml</code>，同目录还有 <code>auth.json</code>、<code>history.jsonl</code>）；项目级 仓库内 <code>.codex/config.toml</code>（从项目根遍历到 cwd，沿途每层加载，<strong>仅已信任项目生效</strong>）。文件内部还能用 <code>[profiles.&lt;name&gt;]</code> 定义命名配置集——profile 是"配置集"，不是独立的文件位置。</p>
+    <p class="reveal"><strong>跨配置源的六层优先级（高 → 低）</strong>：① CLI flag / <code>-c</code> / <code>--config</code> 即席覆盖 ★最高 → ② <code>--profile</code> 选中的 profile 值 → ③ 项目级 <code>.codex/config.toml</code>（root→cwd，closest wins，仅信任项目）→ ④ 用户级 <code>~/.codex/config.toml</code> → ⑤ 系统级 <code>/etc/codex/config.toml</code>（若存在）→ ⑥ 内置默认值 ★最低。</p>
+    <div class="callout reveal">
+      <div class="co-title">官方例子 &amp; 两个维度</div>
+      <p>用户级写 <code>model = "gpt-5.5"</code> → 项目级覆盖成 <code>gpt-5-pro</code> → 启动又加 <code>--model gpt-4.1</code> → 最终生效 <code>gpt-4.1</code>。注意区分：上面是<strong>跨文件 / 跨来源</strong>的优先级；而在<strong>单个 config.toml 内部</strong>，合并顺序是 <code>profile 段 &gt; 该文件顶层 base 段 &gt; 内置默认</code>。</p>
+    </div>
+    <p class="reveal"><strong>AGENTS.md 的加载顺序（拼接，非覆盖）</strong>：① 全局 <code>~/.codex/AGENTS.md</code> → ② 项目根 <code>AGENTS.md</code> → ③ 子目录 <code>AGENTS.md</code>（cwd 路径上每一层，越靠近 cwd 越后注入）。全部拼接进上下文，不丢内容；越具体、越后注入的指令模型通常越重视。某目录若存在 <code>AGENTS.override.md</code>，则进入覆盖模式，用 override 替代该处常规指令发现。</p>
+    <div class="callout green reveal">
+      <div class="co-title">落到本机 &amp; 排错口诀</div>
+      <p>本机<strong>只有用户级</strong> config.toml，没有项目级——项目规范走 AGENTS.md 体系，正符合"config.toml 管行为、AGENTS.md 管规范"。临时换模型用 <code>codex --model ...</code> 或 <code>/model</code>（第 1 层覆盖）；给某仓库单独配则建 <code>.codex/config.toml</code> 并标 <code>trust_level = "trusted"</code>（不信任的项目其项目级 config 不被读）。<strong>改完不生效？</strong>先想"是不是被更高一层盖了"：CLI &gt; profile &gt; 项目 &gt; 用户 &gt; 系统 &gt; 默认。</p>
+    </div>
+
+    <h3 class="reveal" id="s6-multi">多供应商接入：为什么不能"选择器直连多家"</h3>
+    <div class="callout amber reveal">
+      <div class="co-title">一句话结论</div>
+      <p>想把 DeepSeek / Kimi / GLM 等多家 API 同时配进 Codex、并在选择器里随意切换？<strong>能"配进去"，也能"在选择器里看见"，但原生无法"点哪家就直连哪家、且都跑通"。</strong>想真正随意切换且各自可用，必须中间加一层网关——这是绕开 Codex 两条硬限制的唯一办法。</p>
+    </div>
+    <p class="reveal">把"配置多供应商"拆成三件独立的事，源码（<code>openai/codex</code> 的 Rust 源码，main 分支）给出的答案各不相同：</p>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>你想做的事</th><th>能否做到</th><th>原因</th></tr></thead>
+        <tbody>
+          <tr><td><code>config.toml</code> 里同时写多个 <code>[model_providers.X]</code></td><td class="yes">✓</td><td>provider 定义是 map，多表名合并共存</td></tr>
+          <tr><td>在模型目录列多家 slug，让它们<strong>出现在 <code>/model</code> 选择器</strong></td><td class="yes">✓</td><td>选择器列的是 catalog，列了就显示</td></tr>
+          <tr><td>选了某 slug 就<strong>直连对应厂商</strong>且跑通</td><td class="no">✗ 原生不行</td><td>下面两条硬限制</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="reveal"><strong>硬限制 ① <code>wire_api</code> 只剩 <code>responses</code>，<code>chat</code> 已删除</strong>（是 removed 不是 deprecated，连 <code>ollama-chat</code> 也移除）。Codex 现在对外<strong>只发 <code>POST {base_url}/responses</code></strong>，而 DeepSeek / Kimi / GLM 的兼容层普遍只有 <code>/v1/chat/completions</code>——所以<strong>直连这些厂商连单家都跑不通</strong>，网关是必经之路：</p>
+    <div class="codeblock reveal"><span class="code-label">codex-rs/model-provider-info/src/lib.rs</span><pre><code><span class="tk-k">pub enum</span> WireApi {
+    #[default]
+    Responses,                          <span class="tk-c">// 枚举里只剩这一个变体</span>
+}
+<span class="tk-c">// 反序列化时：</span>
+<span class="tk-c">//   "responses" =&gt; Ok(Responses)</span>
+<span class="tk-c">//   "chat"      =&gt; Err(CHAT_WIRE_API_REMOVED_ERROR)   // 写 chat 直接报错</span>
+<span class="tk-c">//   其它        =&gt; Err(unknown_variant)</span></code></pre></div>
+    <p class="reveal"><strong>硬限制 ② 一次会话只有一个 provider，且它不跟模型走</strong>。<code>model_provider_id</code> 只来自 CLI flag 或顶层 <code>model_provider</code>，<strong>没有"从模型名解析 provider"的逻辑</strong>；模型目录条目也没有 <code>provider</code> / <code>base_url</code> 字段。后果：catalog 堆三家 slug，<strong>它们都发去同一个全局 provider 的 base_url</strong>，<code>/model</code> 切模型<strong>不会</strong>切 provider：</p>
+    <div class="codeblock reveal"><span class="code-label">codex-rs/core/src/config/mod.rs</span><pre><code><span class="tk-k">pub</span> model_provider_id: <span class="tk-h">String</span>,          <span class="tk-c">// 整个 Config 就一个 provider id</span>
+<span class="tk-k">let</span> model_provider_id = model_provider              <span class="tk-c">// ① CLI flag 覆盖</span>
+    .or(cfg.model_provider)                         <span class="tk-c">// ② 否则 config 顶层单值</span>
+    .unwrap_or_else(|| <span class="tk-s">"openai"</span>.to_string());       <span class="tk-c">// ③ 否则 openai</span></code></pre></div>
+    <div class="two-col reveal">
+      <div class="mini-card" style="border-color:var(--red-border);background:var(--red-soft)">
+        <h4 style="color:var(--red)">直连 chat-only 厂商 ✗</h4>
+        <p>三个 slug 全砸向同一个全局 provider；若该 provider 是 chat-only 厂商，<code>/responses</code> 直接 404。</p>
+      </div>
+      <div class="mini-card" style="border-color:var(--green-border);background:var(--green-soft)">
+        <h4 style="color:var(--green)">经网关 ✓</h4>
+        <p>网关吃 <code>/responses</code>、按 <code>model</code> 路由到各家 <code>/chat/completions</code>、再把响应包装成 responses 回给 Codex。</p>
+      </div>
+    </div>
+    <p class="reveal"><strong>三条落地路径</strong>：<strong>路径 1（推荐）加一层 OpenAI 兼容网关</strong>——让 Codex 只看见一个 provider，把多厂商路由 + 协议转换全交给网关，正好同时绕开两条硬限制（new-api / one-api 等较新版本已支持 <code>/v1/responses</code> 入站与转换，<strong>部署前务必查最新 release notes 并实测</strong>）。<strong>路径 2</strong> 找一个"responses + 同时含这几家"的聚合平台当单一 provider——百炼的 responses 只支持 Qwen，其余平台缺乏可靠证据，<strong>不建议押</strong>。<strong>路径 3</strong> 每家原生端点 + 启动 <code>--model-provider</code> 切——厂商端点普遍不支持 responses，现在连启动都跑不通，且选择器切不了 provider。</p>
+    <div class="codeblock reveal"><span class="code-label">路径1 · Codex 侧只配一个网关 provider</span><pre><code><span class="tk-c"># ~/.codex/config.toml</span>
+<span class="tk-k">model_provider</span> = <span class="tk-s">"gateway"</span>
+<span class="tk-k">model</span> = <span class="tk-s">"deepseek-v4-pro"</span>
+<span class="tk-k">model_catalog_json</span> = <span class="tk-s">"~/.codex/model-catalog.local.json"</span>
+
+[<span class="tk-h">model_providers.gateway</span>]
+<span class="tk-k">base_url</span> = <span class="tk-s">"http://127.0.0.1:8317/v1"</span>
+<span class="tk-k">env_key</span>  = <span class="tk-s">"GATEWAY_API_KEY"</span>          <span class="tk-c"># 各家真实 key 交给网关保管</span>
+<span class="tk-k">wire_api</span> = <span class="tk-s">"responses"</span></code></pre></div>
+    <p class="reveal"><strong>用"切目录"模拟 Claude Code 的多配置</strong>：Codex 有完全对应的机制——项目级 <code>.codex/config.toml</code> 能覆盖用户级的 <code>model</code> 与 <code>model_provider</code>（分层 TOML 合并，项目级排在用户级之上），所以"切目录 = 换一套 effective config = 真的换 provider"。但比 Claude Code 多两道门槛：① <strong>信任门控 + 信任按 git 根解析</strong>——裸文件夹不算项目，每个模型文件夹需各自 <code>git init</code> 并标 trusted；② <strong>协议墙不变</strong>——每个目录的 provider <code>base_url</code> 仍须指向协议转换代理。</p>
+    <div class="tree reveal"><span class="dir">C:/Users/JINGRUI/ai-models/</span>
+├── <span class="dir">deepseek/</span>   <span class="cmt">(.git + .codex/config.toml → model_provider="deepseek")</span>
+├── <span class="dir">kimi/</span>       <span class="cmt">(.git + .codex/config.toml → model_provider="kimi")</span>
+└── <span class="dir">glm/</span>        <span class="cmt">(.git + .codex/config.toml → model_provider="glm")</span></div>
+    <p class="reveal"><strong>三种组织方式对比</strong>：切目录（<code>cd</code> 后启动，要多目录 + 信任，会话内不能切）；<strong>profile 最轻</strong>（<code>codex --profile kimi</code>，全在用户级一个文件，无目录无信任坑，但会话内不能切）；<strong>网关最丝滑</strong>（会话内 <code>/model</code> 切，无需目录，网关统一转换 + 路由）。profile 写法无需建目录：</p>
+    <div class="codeblock reveal"><span class="code-label">profile · 全在用户级 config.toml</span><pre><code>[<span class="tk-h">profiles.kimi</span>]
+<span class="tk-k">model_provider</span> = <span class="tk-s">"kimi"</span>
+<span class="tk-k">model</span> = <span class="tk-s">"kimi-3"</span>
+[<span class="tk-h">profiles.glm</span>]
+<span class="tk-k">model_provider</span> = <span class="tk-s">"glm"</span>
+<span class="tk-k">model</span> = <span class="tk-s">"glm-5.2"</span></code></pre></div>
+    <div class="callout green reveal">
+      <div class="co-title">与 Claude Code 的根本差异</div>
+      <p>切目录切模型：两者机制对等（项目级配置都能改 model / provider）。额外门槛：Claude Code 只有项目信任提示，Codex 的<strong>信任按 git 根解析</strong>（裸文件夹需 <code>git init</code>）。协议墙：Claude Code 无，Codex <strong>强制 <code>/responses</code></strong>（端点不支持仍 404）。<strong>一句话</strong>：你在 Claude Code 里"建好目录就能用三家"，是因为没有这条协议墙；搬到 Codex，形式能抄，但每家端点还得先过 responses 这一关——三条路都绕不开"被选端点必须 responses 兼容"。</p>
+    </div>
   </section>
 
   <!-- ============ S7 ============ -->
